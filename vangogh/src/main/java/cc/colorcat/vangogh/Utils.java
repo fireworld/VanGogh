@@ -53,6 +53,27 @@ public class Utils {
         }
     }
 
+    public static void deleteIfExists(File... files) throws IOException {
+        for (File file : files) {
+            deleteIfExists(file);
+        }
+    }
+
+    public static void deleteIfExists(File file) throws IOException {
+        if (file.exists() && !file.delete()) {
+            throw new IOException("failed to delete " + file);
+        }
+    }
+
+    public static void renameTo(File from, File to, boolean deleteDest) throws IOException {
+        if (deleteDest) {
+            deleteIfExists(to);
+        }
+        if (!from.renameTo(to)) {
+            throw new IOException("failed to rename");
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getService(Context ctx, String service) {
         return (T) ctx.getSystemService(service);
