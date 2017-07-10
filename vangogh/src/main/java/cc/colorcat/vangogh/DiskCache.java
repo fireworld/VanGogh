@@ -114,6 +114,14 @@ public final class DiskCache {
         return snapshot;
     }
 
+    public synchronized InputStream getInputStream(String key) {
+        return getSnapshot(key).getInputStream();
+    }
+
+    public synchronized OutputStream getOutputStream(String key) {
+        return getSnapshot(key).getOutputStream();
+    }
+
     public void clear() throws IOException {
         Utils.deleteContents(directory);
     }

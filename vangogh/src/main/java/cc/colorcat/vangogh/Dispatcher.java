@@ -46,31 +46,31 @@ public class Dispatcher {
 
         @Override
         public void run() {
-            final String key = request.key();
-            final String url = request.url();
-            VanGogh.LoadedFrom from;
-            Bitmap bitmap = memoryCache.get(key);
-            if (bitmap == null) {
-                bitmap = fromDisk(key);
-                if (bitmap == null) {
-                    bitmap = fromNetwork(key, url);
-                    if (bitmap != null) {
-                        from = VanGogh.LoadedFrom.NETWORK;
-                    } else {
-                        from = VanGogh.LoadedFrom.DISK;
-                    }
-                } else {
-                    from = VanGogh.LoadedFrom.DISK;
-                }
-                if (bitmap != null) {
-                    memoryCache.save(key, bitmap);
-                }
-            } else {
-                from = VanGogh.LoadedFrom.MEMORY;
-            }
-            if (bitmap != null) {
-                request.deliver(bitmap, from, null);
-            }
+//            final String key = request.key();
+//            final String url = request.url();
+//            VanGogh.LoadedFrom from;
+//            Bitmap bitmap = memoryCache.get(key);
+//            if (bitmap == null) {
+//                bitmap = fromDisk(key);
+//                if (bitmap == null) {
+//                    bitmap = fromNetwork(key, url);
+//                    if (bitmap != null) {
+//                        from = VanGogh.LoadedFrom.NETWORK;
+//                    } else {
+//                        from = VanGogh.LoadedFrom.DISK;
+//                    }
+//                } else {
+//                    from = VanGogh.LoadedFrom.DISK;
+//                }
+//                if (bitmap != null) {
+//                    memoryCache.save(key, bitmap);
+//                }
+//            } else {
+//                from = VanGogh.LoadedFrom.MEMORY;
+//            }
+//            if (bitmap != null) {
+//                request.deliver(bitmap, from, null);
+//            }
         }
 
 
@@ -88,27 +88,27 @@ public class Dispatcher {
             return null;
         }
 
-        private Bitmap fromNetwork(String key, String url) {
-            InputStream is = null;
-            OutputStream os = null;
-            Downloader loader = downloader.clone();
-            try {
-                Downloader.Response response = loader.load(url);
-                if (response != null) {
-                    is = response.stream;
-                    DiskCache.Snapshot snapshot = diskCache.getSnapshot(key);
-                    os = snapshot.getOutputStream();
-                    Utils.justDump(is, os);
-                    return fromDisk(key);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                Utils.close(is);
-                Utils.close(os);
-                loader.shutdown();
-            }
-            return null;
-        }
+//        private Bitmap fromNetwork(String key, String url) {
+//            InputStream is = null;
+//            OutputStream os = null;
+//            Downloader loader = downloader.clone();
+//            try {
+//                Downloader.Response response = loader.load(, url);
+//                if (response != null) {
+//                    is = response.stream;
+//                    DiskCache.Snapshot snapshot = diskCache.getSnapshot(key);
+//                    os = snapshot.getOutputStream();
+//                    Utils.justDump(is, os);
+//                    return fromDisk(key);
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                Utils.close(is);
+//                Utils.close(os);
+//                loader.shutdown();
+//            }
+//            return null;
+//        }
     }
 }

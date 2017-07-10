@@ -2,6 +2,8 @@ package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.support.annotation.DrawableRes;
 import android.view.View;
 
 /**
@@ -11,76 +13,71 @@ import android.view.View;
 public class Request {
     private static final int TAG_ID = View.generateViewId();
 
-    private String url;
+    private Uri uri;
     private String key;
     private Target target;
-    private Drawable preparePlaceHolder;
-    private Drawable errorDrawable;
-    private Callback callback;
+    private Drawable placeHolder;
+    private Drawable error;
+    private Listener listener;
 
-    Request(String url) {
-        if (!Utils.isHttpUrl(url)) {
-            throw new IllegalArgumentException("is not http/https: " + url);
+
+    public static class Builder {
+        private Uri uri;
+        private String key;
+        private Target target;
+        private Drawable placeHolder;
+        private Drawable error;
+        private Listener listener;
+
+        private Builder(Uri uri) {
+            this.uri = uri;
+            this.key = Utils.md5(uri.toString());
         }
-        this.url = url;
-        this.key = Utils.md5(url);
-    }
 
-    Request target(Target target) {
-        this.target = target;
-        if (this.target != null) {
-            this.target.getView().setTag(TAG_ID, key);
+        private Builder(String url) {
+            this.uri = Uri.parse(url);
+            this.key = Utils.md5(url);
         }
-        return this;
-    }
 
-    Request prepareDrawable(Drawable placeHolder) {
-        this.preparePlaceHolder = placeHolder;
-        return this;
-    }
-
-    Request errorDrawable(Drawable placeHolder) {
-        this.errorDrawable = placeHolder;
-        return this;
-    }
-
-    String key() {
-        return key;
-    }
-
-    String url() {
-        return url;
-    }
-
-    void prepare() {
-        if (target != null && preparePlaceHolder != null) {
-            target.onPrepareLoad(preparePlaceHolder);
+        private Builder(Request request) {
+            this.uri = request.uri;
+            this.key = request.key;
+            this.target = request.target;
+            this.placeHolder = request.placeHolder;
+            this.error = request.error;
+            this.listener = request.listener;
         }
-    }
 
-    void deliver(Bitmap bitmap, VanGogh.LoadedFrom from, Exception e) {
-        boolean deliverToTarget = target != null && key.equals(target.getView().getTag(TAG_ID));
-        if (bitmap != null) {
-            if (deliverToTarget) {
-                target.onBitmapLoaded(bitmap, url, from);
+        public Builder placeHolder(Drawable drawable) {
+            if (drawable == null) {
+                throw new NullPointerException("drawable == null");
             }
-            if (callback != null) {
-                callback.onSuccess(bitmap, url);
+            this.placeHolder = drawable;
+            return this;
+        }
+
+        public Builder error(Drawable drawable) {
+            if (drawable == null) {
+                throw new NullPointerException("drawable == null");
             }
-        } else {
-            if (deliverToTarget && errorDrawable != null) {
-                target.onBitmapFailed(errorDrawable);
-            }
-            if (callback != null) {
-                callback.onError(url, e);
-            }
+            this.error = drawable;
+            return this;
+        }
+
+        public Builder(Listener listener) {
+            this.listener = listener;
+        }
+
+        public Builder into(Target target) {
+            this.target = target;
+            return this;
         }
     }
 
-    interface Callback {
+    public interface Listener {
 
-        void onSuccess(Bitmap bitmap, String url);
+        void onSuccess(Request request, Bitmap bitmap);
 
-        void onError(String url, Exception e);
+        void onFailure(Request request, Exception e);
     }
 }

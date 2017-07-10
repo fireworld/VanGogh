@@ -24,6 +24,10 @@ import java.security.NoSuchAlgorithmException;
 
 public class Utils {
 
+    public static boolean isEmpty(CharSequence txt) {
+        return txt == null || txt.length() == 0;
+    }
+
     public static boolean isHttpUrl(String url) {
         return url != null && url.toLowerCase().matches("^(http)(s)?://(\\S)+");
     }

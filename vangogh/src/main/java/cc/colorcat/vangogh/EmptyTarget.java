@@ -4,13 +4,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.View;
-import android.widget.ImageView;
 
 /**
- * Created by cxx on 2017/7/10.
+ * Created by cxx on 2017/7/11.
  * xx.ch@outlook.com
  */
-public class ImageViewTarget implements Target {
+
+public class EmptyTarget implements Target{
     @Override
     public View getView() {
         return null;

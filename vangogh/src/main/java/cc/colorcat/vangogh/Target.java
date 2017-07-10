@@ -15,7 +15,7 @@ public interface Target {
 
     void onPrepareLoad(Drawable placeHolderDrawable);
 
-    void onBitmapLoaded(@NonNull Bitmap bitmap, String url, VanGogh.LoadedFrom from);
+    void onBitmapLoaded(@NonNull Bitmap bitmap, String url, LoadedFrom from);
 
     void onBitmapFailed(Drawable errorDrawable);
 }
