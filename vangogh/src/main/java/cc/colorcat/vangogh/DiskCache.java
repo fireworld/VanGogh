@@ -1,12 +1,11 @@
 package cc.colorcat.vangogh;
 
-import android.support.annotation.NonNull;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,46 +17,38 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by cxx on 2017/7/7.
  * xx.ch@outlook.com
  */
 public final class DiskCache {
+    private static final String DIRTY_SUFFIX = ".tmp";
+    private static final Pattern LEGAL_KEY_PATTERN = Pattern.compile("[a-z0-9_-]{1,64}");
+
     private final LinkedHashMap<String, Snapshot> map;
     private File directory;
 
     private long maxSize;
     private long size;
+    private final ThreadPoolExecutor executor =
+            new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
-    public static DiskCache open(File directory, long maxSize) throws IOException {
-        if (maxSize <= 0) {
-            throw new IllegalArgumentException("maxSize <= 0");
-        }
-        if (directory.isFile()) {
-            throw new IOException(directory.getAbsolutePath() + " is not a directory!");
-        }
-        DiskCache cache;
-        synchronized (DiskCache.class) {
-            File dir = new File(directory, "diskCache");
-            if (dir.exists() || dir.mkdirs()) {
-                cache = new DiskCache(dir, maxSize);
-                cache.cleanDirtyFile();
-                cache.readSnapshots();
-                return cache;
+    private final Callable<Void> cleanupCallable = new Callable<Void>() {
+        @Override
+        public Void call() throws Exception {
+            synchronized (DiskCache.this) {
+                trimToSize(maxSize);
+                return null;
             }
         }
-        throw new IOException("create directory failure, path = " + directory.getAbsolutePath());
-    }
-
-    public Snapshot getSnapshot(String key) {
-        Snapshot snapshot = map.get(key);
-        if (snapshot == null) {
-            snapshot = new Snapshot(key);
-            map.put(key, snapshot);
-        }
-        return snapshot;
-    }
+    };
 
     private DiskCache(File directory, long maxSize) {
         this.directory = directory;
@@ -65,11 +56,31 @@ public final class DiskCache {
         this.map = new LinkedHashMap<>(0, 0.75F, true);
     }
 
+    public static DiskCache open(File directory, long maxSize) throws IOException {
+        if (maxSize <= 0) {
+            throw new IllegalArgumentException("maxSize <= 0");
+        }
+        if (directory.isFile()) {
+            throw new IOException(directory + " is not a directory!");
+        }
+        synchronized (DiskCache.class) {
+            File dir = new File(directory, "diskCache");
+            if (dir.exists() || dir.mkdirs()) {
+                DiskCache cache = new DiskCache(dir, maxSize);
+                cache.cleanDirtyFile();
+                cache.readSnapshots();
+                cache.asyncTrimToSize();
+                return cache;
+            }
+            throw new IOException("failed to create directory: " + dir);
+        }
+    }
+
     private void cleanDirtyFile() throws IOException {
         File[] dirty = directory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return file.isFile() && file.getName().endsWith(".tmp");
+                return file.isFile() && file.getName().endsWith(DIRTY_SUFFIX);
             }
         });
         Utils.deleteIfExists(dirty);
@@ -82,33 +93,80 @@ public final class DiskCache {
                 return file.isFile();
             }
         });
+        assert files != null;
         List<File> list = Arrays.asList(files);
         Collections.sort(list, new FileComparator());
-        int putCount = list.size();
-        for (int i = 0; i < putCount; ++i) {
+        for (int i = 0, size = list.size(); i < size; ++i) {
             File file = list.get(i);
-            size += Utils.sizeOf(file);
+            this.size += Utils.sizeOf(file);
             String name = file.getName();
             map.put(name, new Snapshot(name));
         }
     }
 
-    private void completeWrite(Snapshot snapshot, boolean success) throws IOException {
+    public synchronized Snapshot getSnapshot(String key) {
+        checkKey(key);
+        Snapshot snapshot = map.get(key);
+        if (snapshot == null) {
+            snapshot = new Snapshot(key);
+            map.put(key, snapshot);
+        }
+        return snapshot;
+    }
+
+    public void clear() throws IOException {
+        Utils.deleteContents(directory);
+    }
+
+    public long maxSize() {
+        return maxSize;
+    }
+
+    public long size() {
+        return size;
+    }
+
+    private void checkKey(String key) {
+        Matcher matcher = LEGAL_KEY_PATTERN.matcher(key);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("keys must match regex [a-z0-9_-]{1,64}: \"" + key + "\"");
+        }
+    }
+
+    private void completeWriteSnapshot(Snapshot snapshot, boolean success) throws IOException {
         try {
             File dirty = snapshot.getDirtyFile();
             File clean = snapshot.getCleanFile();
-            if (!success) {
-                Utils.deleteIfExists(dirty);
-                if (!clean.exists()) {
-                    map.remove(snapshot.key);
+            if (success) {
+                if (dirty.exists()) {
+                    long oldLength = clean.length();
+                    long newLength = dirty.length();
+                    Utils.renameTo(dirty, clean, true);
+                    size = size - oldLength + newLength;
+                    asyncTrimToSize();
+//                    if (size > maxSize) {
+//                        executor.submit(cleanupCallable);
+//                    }
+//                    trimToSize(maxSize);
                 }
             } else {
-                long oldLength = clean.length();
-                long newLength = dirty.length();
-                Utils.renameTo(dirty, clean, true);
-                size = size - oldLength + newLength;
-                trimToSize(maxSize);
+                Utils.deleteIfExists(dirty);
             }
+
+//            if (!success) {
+//                Utils.deleteIfExists(dirty);
+//                if (!clean.exists()) {
+//                    map.remove(snapshot.key);
+//                }
+//            } else if (dirty.exists()) {
+//                long oldLength = clean.length();
+//                long newLength = dirty.length();
+//                Utils.renameTo(dirty, clean, true);
+//                size = size - oldLength + newLength;
+//                trimToSize(maxSize);
+//            } else if (!clean.exists()) {
+//                map.remove(snapshot.key);
+//            }
         } finally {
             snapshot.writing = false;
             snapshot.committed = false;
@@ -116,11 +174,16 @@ public final class DiskCache {
         }
     }
 
+    private void asyncTrimToSize() {
+        if (size > maxSize) {
+            executor.submit(cleanupCallable);
+        }
+    }
+
     private void trimToSize(long maxSize) throws IOException {
         Iterator<Map.Entry<String, Snapshot>> iterator = map.entrySet().iterator();
         while (size > maxSize && iterator.hasNext()) {
             Map.Entry<String, Snapshot> toEvict = iterator.next();
-            String key = toEvict.getKey();
             Snapshot value = toEvict.getValue();
             if (value.readCount == 0 && !value.writing) {
                 File clean = value.getCleanFile();
@@ -131,6 +194,7 @@ public final class DiskCache {
             }
         }
     }
+
 
     public final class Snapshot {
         private String key;
@@ -147,7 +211,7 @@ public final class DiskCache {
             synchronized (DiskCache.this) {
                 try {
                     ++readCount;
-                    return new FileInputStream(getCleanFile());
+                    return new SnapshotInputStream(new FileInputStream(getCleanFile()));
                 } catch (FileNotFoundException e) {
                     --readCount;
                     return null;
@@ -161,17 +225,17 @@ public final class DiskCache {
                     try {
                         FileOutputStream fos = new FileOutputStream(getDirtyFile());
                         writing = true;
-                        return new FaultHidingOutputStream(fos);
+                        return new SnapshotOutputStream(fos);
                     } catch (FileNotFoundException e) {
                         writing = false;
-                        throw new IllegalStateException(directory + " not exists.");
+                        throw new IllegalStateException(directory + " does not exist.");
                     }
                 }
                 return null;
             }
         }
 
-        public void complete() throws IOException {
+        private void completeRead() throws IOException {
             synchronized (DiskCache.this) {
                 --readCount;
                 if (readCount < 0) {
@@ -179,21 +243,21 @@ public final class DiskCache {
                 }
                 if (readCount == 0) {
                     if (writing && committed) {
-                        completeWrite(this, !hasErrors);
+                        completeWriteSnapshot(this, !hasErrors);
                     }
                 }
             }
         }
 
-        public void commit() throws IOException {
+        private void commitWrite() throws IOException {
             synchronized (DiskCache.this) {
                 if (writing && !committed) {
                     committed = true;
                     if (readCount == 0) {
-                        completeWrite(this, !hasErrors);
+                        completeWriteSnapshot(this, !hasErrors);
                     }
                 } else {
-                    throw new IllegalStateException("not writing or committed.");
+                    throw new IllegalStateException("writing = " + writing + ", committed = " + committed);
                 }
             }
         }
@@ -203,13 +267,35 @@ public final class DiskCache {
         }
 
         private File getDirtyFile() {
-            return new File(directory, key + ".tmp");
+            return new File(directory, key + DIRTY_SUFFIX);
         }
 
 
-        private class FaultHidingOutputStream extends FilterOutputStream {
+        private class SnapshotInputStream extends FilterInputStream {
+            private boolean closed = false;
 
-            private FaultHidingOutputStream(OutputStream out) {
+            private SnapshotInputStream(InputStream in) {
+                super(in);
+            }
+
+            @Override
+            public void close() throws IOException {
+                if (!closed) {
+                    closed = true;
+                    try {
+                        in.close();
+                    } finally {
+                        completeRead();
+                    }
+                }
+            }
+        }
+
+
+        private class SnapshotOutputStream extends FilterOutputStream {
+            private boolean closed = false;
+
+            private SnapshotOutputStream(OutputStream out) {
                 super(out);
             }
 
@@ -223,18 +309,14 @@ public final class DiskCache {
             }
 
             @Override
-            public void write(@NonNull byte[] buffer, int offset, int length) {
-                try {
-                    out.write(buffer, offset, length);
-                } catch (IOException e) {
-                    hasErrors = true;
-                }
+            public void write(byte[] buffer) {
+                write(buffer, 0, buffer.length);
             }
 
             @Override
-            public void close() {
+            public void write(byte[] buffer, int offset, int length) {
                 try {
-                    out.close();
+                    out.write(buffer, offset, length);
                 } catch (IOException e) {
                     hasErrors = true;
                 }
@@ -246,6 +328,24 @@ public final class DiskCache {
                     out.flush();
                 } catch (IOException e) {
                     hasErrors = true;
+                }
+            }
+
+            @Override
+            public void close() {
+                if (!closed) {
+                    closed = true;
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        hasErrors = true;
+                    } finally {
+                        try {
+                            commitWrite();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }
