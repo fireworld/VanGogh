@@ -41,19 +41,19 @@ public final class Result {
         this.from = from;
     }
 
-    public Bitmap getBitmap() {
+    Bitmap bitmap() {
         return bitmap;
     }
 
-    public InputStream getStream() {
+    InputStream stream() {
         return stream;
     }
 
-    public long getContentLength() {
+    long contentLength() {
         return contentLength;
     }
 
-    public LoadedFrom getFrom() {
+    LoadedFrom from() {
         return from;
     }
 }

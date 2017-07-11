@@ -9,7 +9,7 @@ import android.support.annotation.ColorInt;
  */
 
 public enum LoadedFrom {
-    NONE(Color.TRANSPARENT),
+    ANY(Color.TRANSPARENT),
     MEMORY(Color.GREEN),
     DISK(Color.BLUE),
     NETWORK(Color.RED);

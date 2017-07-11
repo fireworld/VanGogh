@@ -3,8 +3,10 @@ package cc.colorcat.vangoghdemo;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -18,6 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +63,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
 //        com.squareup.picasso.Picasso
 
         initView();
@@ -82,6 +86,7 @@ public class MainActivity extends Activity {
                         .setText(R.id.tv_description, courseBean.getDescription());
                 ImageView imageView = holder.getView(R.id.iv_icon);
                 VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).into(imageView);
+//                VanGogh.with(imageView.getContext()).load(Uri.fromFile(new File("/data/ssss"))).into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());
 //                Picasso.with(MainActivity.this).load(courseBean.getPicBigUrl()).into(imageView);

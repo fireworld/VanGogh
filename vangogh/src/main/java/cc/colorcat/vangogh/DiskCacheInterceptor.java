@@ -1,6 +1,5 @@
 package cc.colorcat.vangogh;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,52 +18,33 @@ class DiskCacheInterceptor implements Interceptor {
     @Override
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
-        if (diskCache == null) {
-            Result result = chain.proceed(chain.task());
-            InputStream is = result.getStream();
-            LoadedFrom resultFrom = result.getFrom();
-            if (is != null && result.getFrom() == LoadedFrom.NETWORK) {
-                byte[] bytes = Utils.toBytes(is);
-                is.close();
-                return new Result(new ByteArrayInputStream(bytes), result.getContentLength(), resultFrom);
-            }
-            return result;
-        }
-
-
-        LoadedFrom from = task.from();
-        if (from == LoadedFrom.NONE || from == LoadedFrom.DISK) {
-            InputStream is = null;
-            try {
-                DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.getKey());
-                is = snapshot.getInputStream();
-                long length = snapshot.getContentLength();
-                if (is != null && length > 0L) {
-                    return new Result(is, length, LoadedFrom.DISK);
-                }
-            } finally {
-                Utils.close(is);
-            }
-        }
-        Result result = chain.proceed(task);
-        LoadedFrom resultFrom = result.getFrom();
-        InputStream is = result.getStream();
-        if (is != null && resultFrom == LoadedFrom.NETWORK) {
-            byte[] bytes = Utils.toBytes(is);
-            is.close();
+        LoadedFrom reqFrom = task.from();
+        if (reqFrom == LoadedFrom.ANY || reqFrom == LoadedFrom.DISK) {
             DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.getKey());
-            OutputStream os = null;
-            try {
-                os = snapshot.getOutputStream();
-                if (os != null) {
-                    Utils.justDump(new ByteArrayInputStream(bytes), os);
-                }
-            } finally {
-                Utils.close(os);
+            InputStream is = snapshot.getInputStream();
+            long length = snapshot.getContentLength();
+            if (is != null && length > 0L) {
+                return new Result(is, length, LoadedFrom.DISK);
             }
-            return new Result(new ByteArrayInputStream(bytes), result.getContentLength(), resultFrom);
         }
 
-        return chain.proceed(task);
+        Result result = chain.proceed(task);
+        LoadedFrom resultFrom = result.from();
+        if (resultFrom == LoadedFrom.NETWORK) {
+            DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.getKey());
+            OutputStream os = snapshot.getOutputStream();
+            if (os != null) {
+                InputStream is = result.stream();
+                if (Utils.dumpAndCloseQuietly(is, os)) {
+                    is = snapshot.getInputStream();
+                    long contentLength = snapshot.getContentLength();
+                    if (is != null && contentLength > 0L) {
+                        return new Result(is, contentLength, LoadedFrom.NETWORK);
+                    }
+                    throw new IOException("DiskCache reporting error");
+                }
+            }
+        }
+        return result;
     }
 }

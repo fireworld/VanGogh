@@ -106,8 +106,7 @@ class Dispatcher {
                 e.printStackTrace();
                 cause = e;
             } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
-                cause = new UnsupportedOperationException("unsupported scheme, uri: " + call.task().getUri());
+                cause = new UnsupportedOperationException("unsupported uri: " + call.task().getUri());
             } finally {
                 executingCalls.remove(call);
                 if (result != null) {

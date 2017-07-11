@@ -1,5 +1,6 @@
 package cc.colorcat.vangogh;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,7 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Task {
     private Uri uri;
     private String key;
-    private LoadedFrom reqFrom = LoadedFrom.NONE;
+    private int maxWidth = -1;
+    private int maxHeight = -1;
+    private Bitmap.Config config;
+    private LoadedFrom reqFrom = LoadedFrom.ANY;
     private AtomicInteger executedCount = new AtomicInteger(0);
 
     Task(Uri uri) {
@@ -46,8 +50,33 @@ public class Task {
         return key;
     }
 
-    public int getAndIncrementCount() {
+    int getAndIncrementCount() {
         return executedCount.getAndIncrement();
+    }
+
+    void setMaxSize(int width, int height) {
+        this.maxWidth = width;
+        this.maxHeight = height;
+    }
+
+    public boolean hasSize() {
+        return maxWidth > 0 && maxHeight > 0;
+    }
+
+    public int maxWidth() {
+        return maxWidth;
+    }
+
+    public int maxHeight() {
+        return maxHeight;
+    }
+
+    void config(Bitmap.Config config) {
+        this.config = config;
+    }
+
+    public Bitmap.Config config() {
+        return this.config;
     }
 
     @Override
@@ -59,7 +88,6 @@ public class Task {
 
         if (!key.equals(task.key)) return false;
         return reqFrom == task.reqFrom;
-
     }
 
     @Override

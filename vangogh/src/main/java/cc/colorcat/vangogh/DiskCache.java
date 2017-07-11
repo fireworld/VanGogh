@@ -1,5 +1,7 @@
 package cc.colorcat.vangogh;
 
+import android.support.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -28,7 +30,8 @@ import java.util.regex.Pattern;
  * Created by cxx on 2017/7/7.
  * xx.ch@outlook.com
  */
-public final class DiskCache {
+@SuppressWarnings("unused")
+final class DiskCache {
     private static final String DIRTY_SUFFIX = ".tmp";
     private static final Pattern LEGAL_KEY_PATTERN = Pattern.compile("[a-z0-9_-]{1,64}");
 
@@ -56,7 +59,7 @@ public final class DiskCache {
         this.map = new LinkedHashMap<>(0, 0.75F, true);
     }
 
-    public static DiskCache open(File directory, long maxSize) throws IOException {
+    static DiskCache open(File directory, long maxSize) throws IOException {
         if (maxSize <= 0) {
             throw new IllegalArgumentException("maxSize <= 0");
         }
@@ -104,7 +107,7 @@ public final class DiskCache {
         }
     }
 
-    public synchronized Snapshot getSnapshot(String key) {
+    synchronized Snapshot getSnapshot(String key) {
         checkKey(key);
         Snapshot snapshot = map.get(key);
         if (snapshot == null) {
@@ -114,23 +117,15 @@ public final class DiskCache {
         return snapshot;
     }
 
-    public synchronized InputStream getInputStream(String key) {
-        return getSnapshot(key).getInputStream();
-    }
-
-    public synchronized OutputStream getOutputStream(String key) {
-        return getSnapshot(key).getOutputStream();
-    }
-
-    public void clear() throws IOException {
+    void clear() throws IOException {
         Utils.deleteContents(directory);
     }
 
-    public long maxSize() {
+    long maxSize() {
         return maxSize;
     }
 
-    public long size() {
+    long size() {
         return size;
     }
 
@@ -204,7 +199,7 @@ public final class DiskCache {
     }
 
 
-    public final class Snapshot {
+    final class Snapshot {
         private String key;
         private int readCount = 0;
         private boolean writing = false;
@@ -215,7 +210,7 @@ public final class DiskCache {
             this.key = key;
         }
 
-        public InputStream getInputStream() {
+        InputStream getInputStream() {
             synchronized (DiskCache.this) {
                 try {
                     ++readCount;
@@ -227,11 +222,11 @@ public final class DiskCache {
             }
         }
 
-        public long getContentLength() {
+        long getContentLength() {
             return getCleanFile().length();
         }
 
-        public OutputStream getOutputStream() {
+        OutputStream getOutputStream() {
             synchronized (DiskCache.this) {
                 if (!writing) {
                     try {
@@ -321,12 +316,12 @@ public final class DiskCache {
             }
 
             @Override
-            public void write(byte[] buffer) {
+            public void write(@NonNull byte[] buffer) {
                 write(buffer, 0, buffer.length);
             }
 
             @Override
-            public void write(byte[] buffer, int offset, int length) {
+            public void write(@NonNull byte[] buffer, int offset, int length) {
                 try {
                     out.write(buffer, offset, length);
                 } catch (IOException e) {

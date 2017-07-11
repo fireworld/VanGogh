@@ -32,6 +32,8 @@ public class VanGogh {
     private Cache<Bitmap> memoryCache;
     private DiskCache diskCache;
 
+    private boolean debug;
+
     public static void setSingleton(VanGogh vanGogh) {
         synchronized (VanGogh.class) {
             if (singleton != null) {
@@ -72,6 +74,7 @@ public class VanGogh {
         retryCount = builder.retryCount;
         interceptors = Collections.unmodifiableList(new ArrayList<>(builder.interceptors));
         downloader = builder.downloader;
+        debug = builder.debug;
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
@@ -105,6 +108,10 @@ public class VanGogh {
         return diskCache;
     }
 
+    boolean debug() {
+        return debug;
+    }
+
 
     public static class Builder {
         private ExecutorService executor;
@@ -117,6 +124,8 @@ public class VanGogh {
         private long memoryCacheSize;
         private File cacheDirectory;
         private long diskCacheSize;
+
+        private boolean debug = true;
 
         public Builder(Context context) {
             if (context == null) {
@@ -189,6 +198,11 @@ public class VanGogh {
                 throw new IllegalArgumentException("sizeInByte < 1");
             }
             this.diskCacheSize = sizeInByte;
+            return this;
+        }
+
+        public Builder debug(boolean debug) {
+            this.debug = debug;
             return this;
         }
 

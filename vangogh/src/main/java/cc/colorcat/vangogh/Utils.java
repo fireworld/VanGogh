@@ -4,6 +4,9 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -31,6 +34,24 @@ public class Utils {
 
     public static boolean isHttpUrl(String url) {
         return url != null && url.toLowerCase().matches("^(http)(s)?://(\\S)+");
+    }
+
+    public static Bitmap makeWatermark(Bitmap src, @ColorInt int color) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+        int size = Math.min(width / 4, height / 4);
+        if (size < 2) return src;
+        Bitmap result = Bitmap.createBitmap(width, height, src.getConfig());
+        Canvas canvas = new Canvas(result);
+        canvas.drawBitmap(src, 0F, 0F, null);
+        Paint paint = new Paint();
+        paint.setColor(color);
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.FILL);
+        int r = size >> 1;
+        canvas.drawCircle(r, r, r, paint);
+        canvas.save();
+        return result;
     }
 
     public static File getCacheDirectory(Context context) {
@@ -65,12 +86,29 @@ public class Utils {
         bos.flush();
     }
 
+    static boolean dumpAndCloseQuietly(InputStream is, OutputStream os) {
+        BufferedInputStream bis = new BufferedInputStream(is);
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        try {
+            byte[] buffer = new byte[4096];
+            for (int length = bis.read(buffer); length != -1; length = bis.read(buffer)) {
+                bos.write(buffer, 0, length);
+            }
+            bos.flush();
+            return true;
+        } catch (IOException e) {
+            return false;
+        } finally {
+            close(bis);
+            close(bos);
+        }
+    }
+
     public static void close(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
             } catch (IOException ignore) {
-
             }
         }
     }
@@ -152,27 +190,23 @@ public class Utils {
         return os.toByteArray();
     }
 
-    @Nullable
-    public static Bitmap decodeStream(@NonNull InputStream is, int reqWidth, int reqHeight) {
-        Bitmap result = null;
-        BufferedInputStream bis = new BufferedInputStream(is);
+    public static Bitmap decodeStream(@NonNull InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
         try {
-            bis.mark(bis.available());
+            is.mark(is.available());
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(bis, null, options);
+            if (config != null) options.inPreferredConfig = config;
+            BitmapFactory.decodeStream(is, null, options);
+            is.reset();
             if (!options.mCancel && options.outWidth != -1 && options.outHeight != -1) {
                 options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
                 options.inJustDecodeBounds = false;
-                bis.reset();
-                result = BitmapFactory.decodeStream(bis, null, options);
+                return BitmapFactory.decodeStream(is, null, options);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return BitmapFactory.decodeStream(is);
         } finally {
-            close(bis);
+            close(is);
         }
-        return result;
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

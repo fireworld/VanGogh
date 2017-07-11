@@ -6,11 +6,13 @@ import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.io.InputStream;
+
 /**
  * Created by cxx on 2017/7/10.
  * xx.ch@outlook.com
  */
-public class BitmapHunter {
+class BitmapHunter {
     private static final int TAG_ID = R.string.app_name;
 
     private Target target;
@@ -44,7 +46,7 @@ public class BitmapHunter {
         if (view == null || task.getUri().equals(view.getTag(TAG_ID))) {
             Bitmap bitmap = process(result);
             if (bitmap != null) {
-                target.onSuccess(bitmap, result.getFrom());
+                target.onSuccess(bitmap, result.from());
             }
         }
     }
@@ -64,9 +66,14 @@ public class BitmapHunter {
     }
 
     private Bitmap process(Result result) {
-        Bitmap bitmap = result.getBitmap();
+        Bitmap bitmap = result.bitmap();
         if (bitmap == null) {
-            bitmap = Utils.decodeStream(result.getStream());
+            InputStream is = result.stream();
+            try {
+                bitmap = Utils.decodeStream(result.stream());
+            } finally {
+                Utils.close(is);
+            }
         }
         return bitmap;
     }
@@ -76,16 +83,15 @@ public class BitmapHunter {
         private Drawable placeHolder;
         private Drawable error;
         private Task task;
-        private LoadedFrom reqFrom = LoadedFrom.NONE;
-
-        Creator(Uri uri) {
-            this.task = new Task(uri);
-            this.target = EmptyTarget.EMPTY;
-        }
+        private LoadedFrom reqFrom = LoadedFrom.ANY;
 
         Creator(String url) {
-            this.task = new Task(url);
-            this.target = EmptyTarget.EMPTY;
+            this(Uri.parse(url));
+        }
+
+        Creator(Uri uri) {
+            task = new Task(uri);
+            target = EmptyTarget.EMPTY;
         }
 
         private Creator(BitmapHunter hunter) {
@@ -117,6 +123,22 @@ public class BitmapHunter {
                 throw new NullPointerException("from == null");
             }
             task.setFrom(from);
+            return this;
+        }
+
+        public Creator maxSize(int width, int height) {
+            if (width < 1 || height < 1) {
+                throw new IllegalArgumentException("width < 1 || height < 1");
+            }
+            task.setMaxSize(width, height);
+            return this;
+        }
+
+        public Creator config(Bitmap.Config config) {
+            if (config == null) {
+                throw new NullPointerException("config == null");
+            }
+            task.config(config);
             return this;
         }
 

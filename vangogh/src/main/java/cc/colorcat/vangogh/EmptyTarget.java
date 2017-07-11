@@ -10,7 +10,7 @@ import android.view.View;
  */
 
 class EmptyTarget implements Target {
-    public final static EmptyTarget EMPTY = new EmptyTarget();
+    final static EmptyTarget EMPTY = new EmptyTarget();
 
     private EmptyTarget() {
 

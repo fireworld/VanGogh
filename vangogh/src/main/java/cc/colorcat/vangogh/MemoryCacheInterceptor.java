@@ -19,12 +19,14 @@ class MemoryCacheInterceptor implements Interceptor {
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
         LoadedFrom from = task.from();
-        if (from == LoadedFrom.NONE || from == LoadedFrom.MEMORY) {
+        if (from == LoadedFrom.ANY || from == LoadedFrom.MEMORY) {
             Bitmap bitmap = memoryCache.get(task.getKey());
             if (bitmap != null) {
                 return new Result(bitmap, LoadedFrom.MEMORY);
             }
         }
-        return chain.proceed(task);
+        Result result = chain.proceed(task);
+        memoryCache.save(task.getKey(), result.bitmap());
+        return result;
     }
 }
