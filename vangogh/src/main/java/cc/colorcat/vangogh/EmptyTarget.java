@@ -2,7 +2,6 @@ package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 import android.view.View;
 
 /**
@@ -10,24 +9,35 @@ import android.view.View;
  * xx.ch@outlook.com
  */
 
-public class EmptyTarget implements Target{
+class EmptyTarget implements Target {
+    public final static EmptyTarget EMPTY = new EmptyTarget();
+
+    private EmptyTarget() {
+
+    }
+
     @Override
     public View getView() {
         return null;
     }
 
     @Override
-    public void onPrepareLoad(Drawable placeHolderDrawable) {
+    public void onStart(Drawable placeHolder) {
 
     }
 
     @Override
-    public void onBitmapLoaded(@NonNull Bitmap bitmap, String url, LoadedFrom from) {
+    public void onSuccess(Bitmap bitmap, LoadedFrom from) {
 
     }
 
     @Override
-    public void onBitmapFailed(Drawable errorDrawable) {
+    public void onFailed(Drawable error, Exception cause) {
+
+    }
+
+    @Override
+    public void onFinish() {
 
     }
 }

@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,14 @@ public class Utils {
 
     public static boolean isHttpUrl(String url) {
         return url != null && url.toLowerCase().matches("^(http)(s)?://(\\S)+");
+    }
+
+    public static File getCacheDirectory(Context context) {
+        File dir = context.getExternalCacheDir();
+        if (dir == null) {
+            dir = context.getCacheDir();
+        }
+        return dir;
     }
 
     public static int calculateMemoryCacheSize(Context ctx) {
@@ -131,6 +140,16 @@ public class Utils {
 
     public static Bitmap decodeStream(InputStream is) {
         return BitmapFactory.decodeStream(is);
+    }
+
+    public static byte[] toBytes(InputStream is) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        for (int length = is.read(buffer); length != -1; length = is.read(buffer)) {
+            os.write(buffer, 0, length);
+        }
+        os.flush();
+        return os.toByteArray();
     }
 
     @Nullable

@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public interface Downloader extends Cloneable {
 
-    Result load(VanGogh vanGogh, Request request) throws IOException;
+    Result load(VanGogh vanGogh, Task task) throws IOException;
 
     void shutDown();
 
