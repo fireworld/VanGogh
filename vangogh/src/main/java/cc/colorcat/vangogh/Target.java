@@ -2,7 +2,6 @@ package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 import android.view.View;
 
 /**
@@ -13,9 +12,11 @@ public interface Target {
 
     View getView();
 
-    void onPrepareLoad(Drawable placeHolderDrawable);
+    void onStart(Drawable placeHolder);
 
-    void onBitmapLoaded(@NonNull Bitmap bitmap, String url, LoadedFrom from);
+    void onSuccess(Bitmap bitmap, LoadedFrom from);
 
-    void onBitmapFailed(Drawable errorDrawable);
+    void onFailed(Drawable error, Exception cause);
+
+    void onFinish();
 }

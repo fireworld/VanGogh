@@ -227,6 +227,10 @@ public final class DiskCache {
             }
         }
 
+        public long getContentLength() {
+            return getCleanFile().length();
+        }
+
         public OutputStream getOutputStream() {
             synchronized (DiskCache.this) {
                 if (!writing) {

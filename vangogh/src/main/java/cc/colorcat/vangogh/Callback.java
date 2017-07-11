@@ -7,11 +7,11 @@ package cc.colorcat.vangogh;
 
 public interface Callback {
 
-    void onStart(Request request);
+    void onStart(BitmapHunter hunter);
 
-    void onResult(Request request, Result result);
+    void onResult(BitmapHunter hunter, Result result);
 
-    void onFailure(Request request, Exception e);
+    void onFailure(BitmapHunter hunter, Exception e);
 
-    void onFinish(Request request);
+    void onFinish(BitmapHunter hunter);
 }
