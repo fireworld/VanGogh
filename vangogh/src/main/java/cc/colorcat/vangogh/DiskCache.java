@@ -159,7 +159,7 @@ final class DiskCache {
 //            if (!success) {
 //                Utils.deleteIfExists(dirty);
 //                if (!clean.exists()) {
-//                    map.remove(snapshot.key);
+//                    map.remove(snapshot.stableKey);
 //                }
 //            } else if (dirty.exists()) {
 //                long oldLength = clean.length();
@@ -168,7 +168,7 @@ final class DiskCache {
 //                size = size - oldLength + newLength;
 //                trimToSize(maxSize);
 //            } else if (!clean.exists()) {
-//                map.remove(snapshot.key);
+//                map.remove(snapshot.stableKey);
 //            }
         } finally {
             snapshot.writing = false;

@@ -6,9 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Looper;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -34,6 +34,16 @@ public class Utils {
 
     public static boolean isHttpUrl(String url) {
         return url != null && url.toLowerCase().matches("^(http)(s)?://(\\S)+");
+    }
+
+    public static void checkMain() {
+        if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
+            throw new IllegalStateException("Method call should not happen reqFrom the main thread.");
+        }
+    }
+
+    public static boolean isMain() {
+        return Looper.getMainLooper().getThread() == Thread.currentThread();
     }
 
     public static Bitmap makeWatermark(Bitmap src, @ColorInt int color) {
@@ -156,7 +166,7 @@ public class Utils {
     /**
      * md5 加密，如果加密失败则原样返回
      */
-    public static String md5(String resource) {
+    static String md5(String resource) {
         String result = resource;
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -171,7 +181,7 @@ public class Utils {
             }
             result = sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            LogUtils.e(e);
         }
         return result;
     }

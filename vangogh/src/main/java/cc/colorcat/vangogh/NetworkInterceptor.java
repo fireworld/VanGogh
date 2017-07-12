@@ -16,7 +16,7 @@ class NetworkInterceptor implements Interceptor {
     @Override
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
-        LoadedFrom from = task.from();
+        LoadedFrom from = task.reqFrom();
         if (from == LoadedFrom.ANY || from == LoadedFrom.NETWORK) {
             Downloader downloader = chain.loader();
             Result result = downloader.load(vanGogh, task);

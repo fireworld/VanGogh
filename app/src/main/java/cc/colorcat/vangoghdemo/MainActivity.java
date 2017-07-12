@@ -3,10 +3,8 @@ package cc.colorcat.vangoghdemo;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,17 +12,15 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.colorcat.vangogh.LoadedFrom;
 import cc.colorcat.vangogh.VanGogh;
 
 
@@ -64,7 +60,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
 
-//        com.squareup.picasso.Picasso
+//        com.squareup.picasso.Target
 
         initView();
 //        initDaVinci();
@@ -85,8 +81,9 @@ public class MainActivity extends Activity {
                 holder.setText(R.id.tv_name, courseBean.getName())
                         .setText(R.id.tv_description, courseBean.getDescription());
                 ImageView imageView = holder.getView(R.id.iv_icon);
-                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).into(imageView);
-//                VanGogh.with(imageView.getContext()).load(Uri.fromFile(new File("/data/ssss"))).into(imageView);
+//                Picasso.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).memoryPolicy(MemoryPolicy.NO_CACHE).networkPolicy(NetworkPolicy.NO_CACHE).into(imageView);
+//                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).loading(R.mipmap.ic_launcher_round).from(LoadedFrom.NETWORK).into(imageView);
+                VanGogh.with(imageView.getContext()).load(courseBean.getPicBigUrl()).from(LoadedFrom.NETWORK).into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());
 //                Picasso.with(MainActivity.this).load(courseBean.getPicBigUrl()).into(imageView);

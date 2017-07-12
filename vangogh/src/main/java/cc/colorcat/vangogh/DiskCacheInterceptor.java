@@ -18,9 +18,9 @@ class DiskCacheInterceptor implements Interceptor {
     @Override
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
-        LoadedFrom reqFrom = task.from();
+        LoadedFrom reqFrom = task.reqFrom();
         if (reqFrom == LoadedFrom.ANY || reqFrom == LoadedFrom.DISK) {
-            DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.getKey());
+            DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.stableKey());
             InputStream is = snapshot.getInputStream();
             long length = snapshot.getContentLength();
             if (is != null && length > 0L) {
@@ -31,7 +31,7 @@ class DiskCacheInterceptor implements Interceptor {
         Result result = chain.proceed(task);
         LoadedFrom resultFrom = result.from();
         if (resultFrom == LoadedFrom.NETWORK) {
-            DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.getKey());
+            DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.stableKey());
             OutputStream os = snapshot.getOutputStream();
             if (os != null) {
                 InputStream is = result.stream();

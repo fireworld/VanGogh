@@ -20,7 +20,7 @@ public final class Result {
             throw new NullPointerException("bitmap == null");
         }
         if (from == null) {
-            throw new NullPointerException("from == null");
+            throw new NullPointerException("reqFrom == null");
         }
         this.bitmap = bitmap;
         this.stream = null;
@@ -33,7 +33,7 @@ public final class Result {
             throw new NullPointerException("is == null");
         }
         if (from == null) {
-            throw new NullPointerException("from == null");
+            throw new NullPointerException("reqFrom == null");
         }
         this.bitmap = null;
         this.stream = is;
