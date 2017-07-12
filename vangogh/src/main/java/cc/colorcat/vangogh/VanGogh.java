@@ -58,7 +58,6 @@ public class VanGogh {
     }
 
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
-        singleton = this;
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
         interceptors = Collections.unmodifiableList(new ArrayList<>(builder.interceptors));
@@ -69,7 +68,6 @@ public class VanGogh {
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
-        LogUtils.init(debug);
     }
 
     public Task.Creator load(String url) {
@@ -81,6 +79,10 @@ public class VanGogh {
         if (uri == null) throw new NullPointerException("uri == null");
         String stableKey = Utils.md5(uri.toString());
         return new Task.Creator(this, uri, stableKey);
+    }
+
+    public void close() {
+        singleton = null;
     }
 
     void enqueue(Task task) {
@@ -123,6 +125,10 @@ public class VanGogh {
         return debug;
     }
 
+    Bitmap quickMemoryCacheCheck(String stableKey) {
+        return memoryCache.get(stableKey);
+    }
+
 
     public static class Builder {
         private ExecutorService executor;
@@ -138,7 +144,7 @@ public class VanGogh {
 
         private Task.Options defaultOptions;
         private Resources resources;
-        private boolean debug = true;
+        private boolean debug = false;
 
         public Builder(Context context) {
             if (context == null) throw new NullPointerException("context == null");
@@ -222,6 +228,11 @@ public class VanGogh {
 
         public Builder debug(boolean debug) {
             this.debug = debug;
+            return this;
+        }
+
+        public Builder enableLog(boolean enabled) {
+            LogUtils.init(enabled);
             return this;
         }
 

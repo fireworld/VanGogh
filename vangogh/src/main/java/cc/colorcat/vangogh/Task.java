@@ -271,15 +271,22 @@ public class Task {
             return this;
         }
 
+        public void into(ImageView view) {
+            if (view == null) throw new NullPointerException("view == null");
+            this.into(new ImageViewTarget(view, stableKey));
+        }
+
         public void into(Target target) {
             if (target == null) throw new NullPointerException("target == null");
             this.target = target;
-            vanGogh.enqueue(new Task(this));
-        }
-
-        public void into(ImageView view) {
-            if (view == null) throw new NullPointerException("view == null");
-            this.target = new ImageViewTarget(view, stableKey);
+            if (!vanGogh.debug() && (reqFrom == LoadedFrom.ANY || reqFrom == LoadedFrom.MEMORY)) {
+                Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
+                if (bitmap != null) {
+                    LogUtils.i("quick memory success.");
+                    this.target.onSuccess(bitmap, LoadedFrom.MEMORY);
+                    return;
+                }
+            }
             vanGogh.enqueue(new Task(this));
         }
     }
