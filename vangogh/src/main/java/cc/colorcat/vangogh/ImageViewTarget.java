@@ -1,6 +1,7 @@
 package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -17,22 +18,16 @@ class ImageViewTarget implements Target {
 
     private Reference<ImageView> ref;
     private String tag;
-    private Drawable original;
-
-    ImageViewTarget(ImageView view) {
-        this(view, Long.toString(System.currentTimeMillis()));
-    }
 
     ImageViewTarget(ImageView view, String tag) {
         view.setTag(TAG_ID, tag);
         this.ref = new WeakReference<>(view);
         this.tag = tag;
-        this.original = view.getDrawable();
     }
 
     @Override
     public void onStart(@Nullable Drawable placeHolder) {
-        setDrawable(placeHolder, true);
+        setDrawable(placeHolder);
     }
 
     @Override
@@ -42,7 +37,7 @@ class ImageViewTarget implements Target {
 
     @Override
     public void onFailed(@Nullable Drawable error, Exception cause) {
-        setDrawable(error, false);
+        setDrawable(error);
         LogUtils.e(cause);
     }
 
@@ -53,14 +48,10 @@ class ImageViewTarget implements Target {
         }
     }
 
-    private void setDrawable(Drawable drawable, boolean start) {
+    private void setDrawable(Drawable drawable) {
         ImageView view = ref.get();
         if (view != null && checkTag(view)) {
-            if (drawable != null) {
-                view.setImageDrawable(drawable);
-            } else if (original != null) {
-                view.setImageDrawable(original);
-            }
+            view.setImageDrawable(drawable);
         }
     }
 

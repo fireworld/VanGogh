@@ -257,7 +257,9 @@ public class Task {
         }
 
         public Creator resize(int width, int height) {
-            if (width < 1 || height < 1) throw new IllegalArgumentException("width < 1 || height < 1");
+            if (width < 1 || height < 1) {
+                throw new IllegalArgumentException("width < 1 || height < 1");
+            }
             options.reqWidth = width;
             options.reqHeight = height;
             return this;
@@ -277,7 +279,7 @@ public class Task {
 
         public void into(ImageView view) {
             if (view == null) throw new NullPointerException("view == null");
-            this.target = new ImageViewTarget(view);
+            this.target = new ImageViewTarget(view, stableKey);
             vanGogh.enqueue(new Task(this));
         }
     }

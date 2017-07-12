@@ -69,6 +69,7 @@ public class VanGogh {
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
+        LogUtils.init(debug);
     }
 
     public Task.Creator load(String url) {

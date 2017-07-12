@@ -43,48 +43,60 @@ class Dispatcher {
         return false;
     }
 
-    private synchronized void promoteTask() {
-        if (executingCalls.size() >= vanGogh.maxRunning()) return;
-        for (RealCall call = waitingCalls.poll(); call != null; call = waitingCalls.poll()) {
+    private void promoteTask() {
+        RealCall call;
+        while (executingCalls.size() < vanGogh.maxRunning() && (call = waitingCalls.poll()) != null) {
             if (executingCalls.add(call)) {
                 executor.submit(new AsyncCall(call));
-                if (executingCalls.size() >= vanGogh.maxRunning()) return;
             }
         }
+
+//        if (executingCalls.size() >= vanGogh.maxRunning()) return;
+//        for (RealCall call = waitingCalls.poll(); call != null; call = waitingCalls.poll()) {
+//            if (executingCalls.add(call)) {
+//                executor.submit(new AsyncCall(call));
+//                if (executingCalls.size() >= vanGogh.maxRunning()) return;
+//            }
+//        }
     }
 
-    private void onSuccess(RealCall call, Result result) {
-        onFinish(call, result, null);
-    }
-
-    private synchronized void onFailure(RealCall call, Exception e) {
-        if (call.task().getAndIncrementExecutedCount() < vanGogh.retryCount()) {
-            if (!waitingCalls.contains(call)) {
-                waitingCalls.add(call);
-            }
-        } else {
-            onFinish(call, null, e);
+    private void completeCall(final RealCall call, final Result result, final Exception cause) {
+        if ((result != null) == (cause != null)) {
+            throw new IllegalStateException("dispatcher reporting error.");
         }
-    }
-
-    private void onFinish(final RealCall call, final Result result, final Exception e) {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                final String key = call.task().stableKey();
-                Iterator<Task> iterator = waitingTasks.iterator();
-                while (iterator.hasNext()) {
-                    Task task = iterator.next();
-                    if (key.equals(task.stableKey())) {
-                        task.onPostResult(result, e);
-                        if (result != null || task.getExecutedCount() >= vanGogh.retryCount()) {
-                            iterator.remove();
-                        }
-                    }
-                }
+                deliver(call.task().stableKey(), result, cause);
             }
         });
+//        executingCalls.remove(call);
+        if (executingCalls.remove(call) |
+                (cause != null
+                        && call.task().getAndIncrementExecutedCount() < vanGogh.retryCount()
+                        && !waitingCalls.contains(call)
+                        && waitingCalls.offer(call))) {
+            promoteTask();
+        }
     }
+
+    private void deliver(String stableKey, Result result, Exception e) {
+        Iterator<Task> iterator = waitingTasks.iterator();
+        while (iterator.hasNext()) {
+            Task task = iterator.next();
+            if (stableKey.equals(task.stableKey())) {
+                task.onPostResult(result, e);
+                if (result != null || task.getExecutedCount() >= vanGogh.retryCount()) {
+                    iterator.remove();
+
+                    LogUtils.e("Dispatcher", "waiting tasks = " + waitingTasks.size()
+                            + "\n waiting calls = " + waitingCalls.size()
+                            + "\n executing calls = " + executingCalls.size());
+                }
+            }
+        }
+    }
+
 
     private class AsyncCall implements Runnable {
         private RealCall call;
@@ -105,13 +117,7 @@ class Dispatcher {
             } catch (IndexOutOfBoundsException e) {
                 cause = new UnsupportedOperationException("unsupported uri: " + call.task().uri());
             } finally {
-                executingCalls.remove(call);
-                if (result != null) {
-                    onSuccess(call, result);
-                } else if (cause != null) {
-                    onFailure(call, cause);
-                }
-                promoteTask();
+                completeCall(call, result, cause);
             }
         }
     }
