@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
                 ImageView imageView = holder.getView(R.id.iv_icon);
 //                Picasso.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).memoryPolicy(MemoryPolicy.NO_CACHE).networkPolicy(NetworkPolicy.NO_CACHE).into(imageView);
 //                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).loading(R.mipmap.ic_launcher_round).from(LoadedFrom.NETWORK).into(imageView);
-                VanGogh.with(imageView.getContext()).load(courseBean.getPicBigUrl()).from(LoadedFrom.NETWORK).into(imageView);
+                    VanGogh.with(imageView.getContext()).load(courseBean.getPicBigUrl()).from(LoadedFrom.NETWORK).into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());
 //                Picasso.with(MainActivity.this).load(courseBean.getPicBigUrl()).into(imageView);
