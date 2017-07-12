@@ -20,12 +20,13 @@ class StreamInterceptor implements Interceptor {
         Bitmap bitmap = result.bitmap();
         if (bitmap == null) {
             InputStream is = result.stream();
-            if (task.hasSize() && is.markSupported()) {
-                Log.i("VanGogh", "markSupported... decode stream");
-                bitmap = Utils.decodeStream(is, task.maxWidth(), task.maxHeight(), task.config());
-            } else {
-                bitmap = Utils.decodeStream(is);
-            }
+            bitmap = Utils.decodeStream(is);
+//            if (task.hasSize() && is.markSupported()) {
+//                Log.i("VanGogh", "markSupported... decode stream");
+//                bitmap = Utils.decodeStream(is, task.maxWidth(), task.maxHeight(), task.config());
+//            } else {
+//                bitmap = Utils.decodeStream(is);
+//            }
         }
         return new Result(bitmap, result.from());
     }

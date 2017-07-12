@@ -20,7 +20,7 @@ class HttpDownloader implements Downloader {
 
     @Override
     public Result load(VanGogh vanGogh, Task task) throws IOException {
-        Uri uri = task.getUri();
+        Uri uri = task.uri();
         String scheme = uri.getScheme();
         if (SCHEME_HTTP.equals(scheme) || SCHEME_HTTPS.equals(scheme)) {
             conn = (HttpURLConnection) new URL(uri.toString()).openConnection();

@@ -1,6 +1,7 @@
 package cc.colorcat.vangogh;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
@@ -32,6 +33,8 @@ public class VanGogh {
     private Cache<Bitmap> memoryCache;
     private DiskCache diskCache;
 
+    private Task.Options defaultOptions;
+    private Resources resources;
     private boolean debug;
 
     public static void setSingleton(VanGogh vanGogh) {
@@ -54,34 +57,37 @@ public class VanGogh {
         return singleton;
     }
 
-    public BitmapHunter.Creator load(String url) {
-        if (Utils.isEmpty(url)) {
-            throw new IllegalArgumentException("url is null or empty");
-        }
-        return new BitmapHunter.Creator(url);
-    }
-
-    public BitmapHunter.Creator load(Uri uri) {
-        if (uri == null) {
-            throw new NullPointerException("uri == null");
-        }
-        return new BitmapHunter.Creator(uri);
-    }
-
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
         singleton = this;
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
         interceptors = Collections.unmodifiableList(new ArrayList<>(builder.interceptors));
         downloader = builder.downloader;
+        defaultOptions = builder.defaultOptions;
+        resources = builder.resources;
         debug = builder.debug;
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
     }
 
-    static void enqueue(BitmapHunter hunter) {
-        VanGogh.singleton.dispatcher.enqueue(hunter);
+    public Task.Creator load(String url) {
+        if (url == null || url.length() == 0) throw new NullPointerException("url is empty");
+        return this.load(Uri.parse(url));
+    }
+
+    public Task.Creator load(Uri uri) {
+        if (uri == null) throw new NullPointerException("uri == null");
+        String stableKey = Utils.md5(uri.toString());
+        return new Task.Creator(this, uri, stableKey);
+    }
+
+    void enqueue(Task task) {
+        dispatcher.enqueue(task);
+    }
+
+    Task.Options defaultOptions() {
+        return defaultOptions.clone();
     }
 
     int maxRunning() {
@@ -108,6 +114,10 @@ public class VanGogh {
         return diskCache;
     }
 
+    Resources resources() {
+        return resources;
+    }
+
     boolean debug() {
         return debug;
     }
@@ -125,16 +135,18 @@ public class VanGogh {
         private File cacheDirectory;
         private long diskCacheSize;
 
+        private Task.Options defaultOptions;
+        private Resources resources;
         private boolean debug = true;
 
         public Builder(Context context) {
-            if (context == null) {
-                throw new NullPointerException("context == null");
-            }
+            if (context == null) throw new NullPointerException("context == null");
             downloader = new HttpDownloader();
             memoryCacheSize = Utils.calculateMemoryCacheSize(context);
             cacheDirectory = Utils.getCacheDirectory(context);
             diskCacheSize = (long) Math.min(50 * 1024 * 1024, cacheDirectory.getUsableSpace() * 0.1);
+            defaultOptions = new Task.Options();
+            resources = context.getResources();
         }
 
         public Builder executor(ExecutorService executor) {
@@ -198,6 +210,12 @@ public class VanGogh {
                 throw new IllegalArgumentException("sizeInByte < 1");
             }
             this.diskCacheSize = sizeInByte;
+            return this;
+        }
+
+        public Builder defaultOptions(Task.Options options) {
+            if (options == null) throw new NullPointerException("options == null");
+            defaultOptions = options;
             return this;
         }
 

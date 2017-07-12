@@ -39,7 +39,7 @@ public class MemoryCache implements Cache<Bitmap> {
     @Override
     public Bitmap get(String key) {
         if (key == null) {
-            throw new NullPointerException("key == null");
+            throw new NullPointerException("stableKey == null");
         }
 
         Bitmap value;
@@ -57,7 +57,7 @@ public class MemoryCache implements Cache<Bitmap> {
     @Override
     public void save(String key, Bitmap bitmap) {
         if (key == null || bitmap == null) {
-            throw new NullPointerException("key == null || bitmap == null");
+            throw new NullPointerException("stableKey == null || bitmap == null");
         }
 
         Bitmap previous;
@@ -76,7 +76,7 @@ public class MemoryCache implements Cache<Bitmap> {
     @Override
     public void remove(String key) {
         if (key == null) {
-            throw new NullPointerException("key == null");
+            throw new NullPointerException("stableKey == null");
         }
 
         Bitmap previous;

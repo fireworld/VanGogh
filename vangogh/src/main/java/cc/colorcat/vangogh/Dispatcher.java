@@ -5,7 +5,6 @@ import android.os.Looper;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,7 +19,7 @@ class Dispatcher {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private ExecutorService executor;
-    private Queue<BitmapHunter> waitingHunters = new LinkedList<>();
+    private Queue<Task> waitingTasks = new ConcurrentLinkedQueue<>();
     private Queue<RealCall> waitingCalls = new ConcurrentLinkedQueue<>();
     private Set<RealCall> executingCalls = new CopyOnWriteArraySet<>();
 
@@ -31,11 +30,12 @@ class Dispatcher {
         this.executor = executor;
     }
 
-    boolean enqueue(BitmapHunter hunter) {
-        if (!waitingHunters.contains(hunter) && waitingHunters.add(hunter)) {
-            hunter.start();
-            RealCall call = new RealCall(vanGogh, hunter.task());
-            if (!waitingCalls.contains(call) && waitingCalls.add(call)) {
+    boolean enqueue(Task task) {
+        Utils.checkMain();
+        if (!waitingTasks.contains(task) && waitingTasks.offer(task)) {
+            task.onPreExecute();
+            RealCall call = new RealCall(vanGogh, task);
+            if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
                 promoteTask();
             }
             return true;
@@ -58,7 +58,7 @@ class Dispatcher {
     }
 
     private synchronized void onFailure(RealCall call, Exception e) {
-        if (call.task().getAndIncrementCount() < vanGogh.retryCount()) {
+        if (call.task().getAndIncrementExecutedCount() < vanGogh.retryCount()) {
             if (!waitingCalls.contains(call)) {
                 waitingCalls.add(call);
             }
@@ -71,18 +71,15 @@ class Dispatcher {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                final String key = call.task().getKey();
-                Iterator<BitmapHunter> iterator = waitingHunters.iterator();
+                final String key = call.task().stableKey();
+                Iterator<Task> iterator = waitingTasks.iterator();
                 while (iterator.hasNext()) {
-                    BitmapHunter hunter = iterator.next();
-                    if (key.equals(hunter.task().getKey())) {
-                        if (result != null) {
-                            hunter.hunted(result);
-                        } else {
-                            hunter.failed(e);
+                    Task task = iterator.next();
+                    if (key.equals(task.stableKey())) {
+                        task.onPostResult(result, e);
+                        if (result != null || task.getExecutedCount() >= vanGogh.retryCount()) {
+                            iterator.remove();
                         }
-                        hunter.finish();
-                        iterator.remove();
                     }
                 }
             }
@@ -103,10 +100,10 @@ class Dispatcher {
             try {
                 result = call.execute();
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtils.e(e);
                 cause = e;
             } catch (IndexOutOfBoundsException e) {
-                cause = new UnsupportedOperationException("unsupported uri: " + call.task().getUri());
+                cause = new UnsupportedOperationException("unsupported uri: " + call.task().uri());
             } finally {
                 executingCalls.remove(call);
                 if (result != null) {

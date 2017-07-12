@@ -2,7 +2,7 @@ package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.view.View;
+import android.support.annotation.Nullable;
 
 /**
  * Created by cxx on 2017/7/11.
@@ -17,12 +17,7 @@ class EmptyTarget implements Target {
     }
 
     @Override
-    public View getView() {
-        return null;
-    }
-
-    @Override
-    public void onStart(Drawable placeHolder) {
+    public void onStart(@Nullable Drawable placeHolder) {
 
     }
 
@@ -32,12 +27,7 @@ class EmptyTarget implements Target {
     }
 
     @Override
-    public void onFailed(Drawable error, Exception cause) {
-
-    }
-
-    @Override
-    public void onFinish() {
+    public void onFailed(@Nullable Drawable error, Exception cause) {
 
     }
 }
