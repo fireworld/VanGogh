@@ -1,7 +1,6 @@
 package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,13 +19,13 @@ class StreamInterceptor implements Interceptor {
         Bitmap bitmap = result.bitmap();
         if (bitmap == null) {
             InputStream is = result.stream();
-            bitmap = Utils.decodeStream(is);
-//            if (task.hasSize() && is.markSupported()) {
-//                Log.i("VanGogh", "markSupported... decode stream");
-//                bitmap = Utils.decodeStream(is, task.maxWidth(), task.maxHeight(), task.config());
-//            } else {
-//                bitmap = Utils.decodeStream(is);
-//            }
+            Task.Options options = task.options();
+            if (options.hasSize()) {
+                bitmap = Utils.decodeStream(is, options);
+            } else {
+                bitmap = Utils.decodeStream(is);
+            }
+
         }
         return new Result(bitmap, result.from());
     }

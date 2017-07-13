@@ -129,18 +129,23 @@ public class Task {
     }
 
     public static class Options implements Cloneable {
+        private Bitmap.Config config = Bitmap.Config.ARGB_8888;
         private int reqWidth = 0;
         private int reqHeight = 0;
-        private Bitmap.Config config = Bitmap.Config.ARGB_8888;
+        private boolean centerInside = false;
 
         Options() {
 
         }
 
-        public Options(int width, int height, Bitmap.Config config) {
+        Options(int width, int height, Bitmap.Config config) {
             this.reqWidth = width;
             this.reqHeight = height;
             this.config = config;
+        }
+
+        public Bitmap.Config config() {
+            return config;
         }
 
         public boolean hasSize() {
@@ -155,8 +160,8 @@ public class Task {
             return reqHeight;
         }
 
-        public Bitmap.Config config() {
-            return config;
+        public boolean centerInside() {
+            return centerInside;
         }
 
         @Override

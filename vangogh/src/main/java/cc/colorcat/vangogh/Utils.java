@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Looper;
 import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,27 +25,15 @@ import java.security.NoSuchAlgorithmException;
  * xx.ch@outlook.com
  */
 
-public class Utils {
+class Utils {
 
-    public static boolean isEmpty(CharSequence txt) {
-        return txt == null || txt.length() == 0;
-    }
-
-    public static boolean isHttpUrl(String url) {
-        return url != null && url.toLowerCase().matches("^(http)(s)?://(\\S)+");
-    }
-
-    public static void checkMain() {
+    static void checkMain() {
         if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
             throw new IllegalStateException("Method call should not happen reqFrom the main thread.");
         }
     }
 
-    public static boolean isMain() {
-        return Looper.getMainLooper().getThread() == Thread.currentThread();
-    }
-
-    public static Bitmap makeWatermark(Bitmap src, @ColorInt int color) {
+    static Bitmap makeWatermark(Bitmap src, @ColorInt int color) {
         int width = src.getWidth();
         int height = src.getHeight();
         int size = Math.min(width / 4, height / 4);
@@ -64,7 +51,7 @@ public class Utils {
         return result;
     }
 
-    public static File getCacheDirectory(Context context) {
+    static File getCacheDirectory(Context context) {
         File dir = context.getExternalCacheDir();
         if (dir == null) {
             dir = context.getCacheDir();
@@ -72,21 +59,21 @@ public class Utils {
         return dir;
     }
 
-    public static int calculateMemoryCacheSize(Context ctx) {
+    static int calculateMemoryCacheSize(Context ctx) {
         ActivityManager am = getService(ctx, Context.ACTIVITY_SERVICE);
         int memoryClass = am.getMemoryClass();
         return 1024 * 1024 * memoryClass / 7;
     }
 
-    public static int sizeOf(Bitmap bitmap) {
+    static int sizeOf(Bitmap bitmap) {
         return bitmap.getByteCount();
     }
 
-    public static long sizeOf(File file) {
+    static long sizeOf(File file) {
         return file.length();
     }
 
-    public static void justDump(InputStream is, OutputStream os) throws IOException {
+    static void justDump(InputStream is, OutputStream os) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
         BufferedOutputStream bos = new BufferedOutputStream(os);
         byte[] buffer = new byte[4096];
@@ -114,7 +101,7 @@ public class Utils {
         }
     }
 
-    public static void close(Closeable closeable) {
+    static void close(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
@@ -123,7 +110,7 @@ public class Utils {
         }
     }
 
-    public static void deleteContents(File dir) throws IOException {
+    static void deleteContents(File dir) throws IOException {
         File[] files = dir.listFiles();
         if (files == null) throw new IOException("not a readable directory: " + dir);
         for (File file : files) {
@@ -136,32 +123,31 @@ public class Utils {
         }
     }
 
-    public static void deleteIfExists(File... files) throws IOException {
+    static void deleteIfExists(File... files) throws IOException {
         for (File file : files) {
             deleteIfExists(file);
         }
     }
 
-    public static void deleteIfExists(File file) throws IOException {
+    static void deleteIfExists(File file) throws IOException {
         if (file.exists() && !file.delete()) {
-            throw new IOException("failed to delete " + file);
+            throw new IOException("failed to delete file: " + file);
         }
     }
 
-    public static void renameTo(File from, File to, boolean deleteDest) throws IOException {
+    static void renameTo(File from, File to, boolean deleteDest) throws IOException {
         if (deleteDest) {
             deleteIfExists(to);
         }
         if (!from.renameTo(to)) {
-            throw new IOException("failed to rename");
+            throw new IOException("failed to rename from " + from + " to " + to);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getService(Context ctx, String service) {
+    private static <T> T getService(Context ctx, String service) {
         return (T) ctx.getSystemService(service);
     }
-
 
     /**
      * md5 加密，如果加密失败则原样返回
@@ -186,11 +172,11 @@ public class Utils {
         return result;
     }
 
-    public static Bitmap decodeStream(InputStream is) {
+    static Bitmap decodeStream(InputStream is) {
         return BitmapFactory.decodeStream(is);
     }
 
-    public static byte[] toBytes(InputStream is) throws IOException {
+    static byte[] toBytes(InputStream is) throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         for (int length = is.read(buffer); length != -1; length = is.read(buffer)) {
@@ -200,21 +186,21 @@ public class Utils {
         return os.toByteArray();
     }
 
-    public static Bitmap decodeStream(@NonNull InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
+
+    static Bitmap decodeStream(InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream(is);
         try {
-            is.mark(is.available());
+            bis.mark(bis.available());
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             if (config != null) options.inPreferredConfig = config;
-            BitmapFactory.decodeStream(is, null, options);
-            is.reset();
-            if (!options.mCancel && options.outWidth != -1 && options.outHeight != -1) {
-                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-                options.inJustDecodeBounds = false;
-                return BitmapFactory.decodeStream(is, null, options);
-            }
-            return BitmapFactory.decodeStream(is);
+            BitmapFactory.decodeStream(bis, null, options);
+            bis.reset();
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeStream(bis, null, options);
         } finally {
+            close(bis);
             close(is);
         }
     }
@@ -225,15 +211,47 @@ public class Utils {
         final int width = options.outWidth;
         int inSampleSize = 1;
         if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
+            final int halfHeight = height >> 1;
+            final int halfWidth = width >> 1;
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2;
             }
         }
         return inSampleSize;
+    }
+
+    static Bitmap decodeStream(InputStream is, Task.Options to) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream(is);
+        try {
+            bis.mark(bis.available());
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            options.inPreferredConfig = to.config();
+            BitmapFactory.decodeStream(bis, null, options);
+            bis.reset();
+            options.inSampleSize = calculateInSampleSize(options, to);
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeStream(bis, null, options);
+        } finally {
+            close(bis);
+            close(is);
+        }
+    }
+
+    private static int calculateInSampleSize(BitmapFactory.Options bo, Task.Options to) {
+        final int reqWidth = to.reqWidth();
+        final int reqHeight = to.reqHeight();
+        final int width = bo.outWidth;
+        final int height = bo.outHeight;
+        int sampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+            final int heightRatio = (int) Math.floor((float) height / (float) reqHeight);
+            final int widthRatio = (int) Math.floor((float) width / (float) reqWidth);
+            sampleSize = to.centerInside() ? Math.max(heightRatio, widthRatio) : Math.min(heightRatio, widthRatio);
+        }
+        return sampleSize;
     }
 
     private Utils() {
