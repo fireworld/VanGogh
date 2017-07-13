@@ -1,7 +1,6 @@
 package cc.colorcat.vangogh;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -31,7 +30,7 @@ class ImageViewTarget implements Target {
     }
 
     @Override
-    public void onSuccess(Bitmap bitmap, LoadedFrom from) {
+    public void onSuccess(Bitmap bitmap, From from) {
         setBitmap(bitmap, from);
     }
 
@@ -41,7 +40,7 @@ class ImageViewTarget implements Target {
         LogUtils.e(cause);
     }
 
-    private void setBitmap(Bitmap bitmap, LoadedFrom from) {
+    private void setBitmap(Bitmap bitmap, From from) {
         ImageView view = ref.get();
         if (view != null && checkTag(view)) {
             view.setImageBitmap(bitmap);

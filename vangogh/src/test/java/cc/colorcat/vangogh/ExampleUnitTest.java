@@ -19,6 +19,17 @@ public class ExampleUnitTest {
 
     @Test
     public void generic() throws Exception {
+        System.out.println(From.MEMORY.policy);
+        System.out.println(From.DISK.policy);
+        System.out.println(From.NETWORK.policy);
+        System.out.println(From.ANY.policy);
+        int test = 0B00111;
+        System.out.println(test);
+
+        System.out.println("===========================");
+        int p1 = From.MEMORY.policy | From.DISK.policy;
+        System.out.println(p1);
+        System.out.println(p1 & From.DISK.policy);
     }
 
     private static class TaskComparator implements Comparator<Task> {

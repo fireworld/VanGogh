@@ -52,14 +52,14 @@ class RealCall implements Call {
 
         RealCall realCall = (RealCall) o;
 
-        if (!task.stableKey().equals(realCall.task.stableKey())) return false;
-        return task.reqFrom() == realCall.task.reqFrom();
+        if (task.fromPolicy() != realCall.task.fromPolicy()) return false;
+        return task.stableKey().equals(realCall.task.stableKey());
     }
 
     @Override
     public int hashCode() {
         int result = task.stableKey().hashCode();
-        result = 31 * result + task.reqFrom().hashCode();
+        result = 31 * result + task.fromPolicy();
         return result;
     }
 

@@ -11,6 +11,7 @@ import android.support.annotation.ColorInt;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -176,16 +177,19 @@ class Utils {
         return BitmapFactory.decodeStream(is);
     }
 
-    static byte[] toBytes(InputStream is) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[4096];
-        for (int length = is.read(buffer); length != -1; length = is.read(buffer)) {
-            os.write(buffer, 0, length);
+    static byte[] toBytesAndClose(InputStream is) throws IOException {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            for (int length = is.read(buffer); length != -1; length = is.read(buffer)) {
+                os.write(buffer, 0, length);
+            }
+            os.flush();
+            return os.toByteArray();
+        } finally {
+            close(is);
         }
-        os.flush();
-        return os.toByteArray();
     }
-
 
     static Bitmap decodeStream(InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
@@ -223,8 +227,13 @@ class Utils {
     }
 
     static Bitmap decodeStream(InputStream is, Task.Options to) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(is);
+        BufferedInputStream bis = null;
+        InputStream resettable = is;
         try {
+            if (resettable.available() == 0) {
+                resettable = new ByteArrayInputStream(toBytesAndClose(is));
+            }
+            bis = new BufferedInputStream(resettable);
             bis.mark(bis.available());
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -236,7 +245,7 @@ class Utils {
             return BitmapFactory.decodeStream(bis, null, options);
         } finally {
             close(bis);
-            close(is);
+            close(resettable);
         }
     }
 

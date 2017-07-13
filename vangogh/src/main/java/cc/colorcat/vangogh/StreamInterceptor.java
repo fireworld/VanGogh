@@ -25,7 +25,6 @@ class StreamInterceptor implements Interceptor {
             } else {
                 bitmap = Utils.decodeStream(is);
             }
-
         }
         return new Result(bitmap, result.from());
     }

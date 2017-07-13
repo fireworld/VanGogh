@@ -14,11 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * xx.ch@outlook.com
  */
 public class Task {
-    private static final int TAG_ID = R.string.app_name;
-
     private Uri uri;
     private String stableKey;
-    private LoadedFrom reqFrom = LoadedFrom.ANY;
+    private int fromPolicy;
     private AtomicInteger executedCount = new AtomicInteger(0);
 
     private Target target;
@@ -30,7 +28,7 @@ public class Task {
     private Task(Creator creator) {
         uri = creator.uri;
         stableKey = creator.stableKey;
-        reqFrom = creator.reqFrom;
+        fromPolicy = creator.fromPolicy;
         target = creator.target;
         loadingDrawable = creator.loadingDrawable;
         errorDrawable = creator.errorDrawable;
@@ -55,8 +53,8 @@ public class Task {
         return stableKey;
     }
 
-    public LoadedFrom reqFrom() {
-        return reqFrom;
+    public int fromPolicy() {
+        return fromPolicy;
     }
 
     public Options options() {
@@ -90,9 +88,9 @@ public class Task {
 
         Task task = (Task) o;
 
+        if (fromPolicy != task.fromPolicy) return false;
         if (!uri.equals(task.uri)) return false;
         if (!stableKey.equals(task.stableKey)) return false;
-        if (reqFrom != task.reqFrom) return false;
         if (!target.equals(task.target)) return false;
         if (loadingDrawable != null ? !loadingDrawable.equals(task.loadingDrawable) : task.loadingDrawable != null)
             return false;
@@ -106,7 +104,7 @@ public class Task {
     public int hashCode() {
         int result = uri.hashCode();
         result = 31 * result + stableKey.hashCode();
-        result = 31 * result + reqFrom.hashCode();
+        result = 31 * result + fromPolicy;
         result = 31 * result + target.hashCode();
         result = 31 * result + (loadingDrawable != null ? loadingDrawable.hashCode() : 0);
         result = 31 * result + (errorDrawable != null ? errorDrawable.hashCode() : 0);
@@ -119,7 +117,7 @@ public class Task {
         return "Task{" +
                 "uri=" + uri +
                 ", stableKey='" + stableKey + '\'' +
-                ", reqFrom=" + reqFrom +
+                ", fromPolicy=" + fromPolicy +
                 ", executedCount=" + executedCount +
                 ", target=" + target +
                 ", loadingDrawable=" + loadingDrawable +
@@ -127,6 +125,7 @@ public class Task {
                 ", options=" + options +
                 '}';
     }
+
 
     public static class Options implements Cloneable {
         private Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -136,12 +135,6 @@ public class Task {
 
         Options() {
 
-        }
-
-        Options(int width, int height, Bitmap.Config config) {
-            this.reqWidth = width;
-            this.reqHeight = height;
-            this.config = config;
         }
 
         public Bitmap.Config config() {
@@ -173,24 +166,27 @@ public class Task {
 
             if (reqWidth != options.reqWidth) return false;
             if (reqHeight != options.reqHeight) return false;
+            if (centerInside != options.centerInside) return false;
             return config == options.config;
 
         }
 
         @Override
         public int hashCode() {
-            int result = reqWidth;
+            int result = config.hashCode();
+            result = 31 * result + reqWidth;
             result = 31 * result + reqHeight;
-            result = 31 * result + config.hashCode();
+            result = 31 * result + (centerInside ? 1 : 0);
             return result;
         }
 
         @Override
         public String toString() {
             return "Options{" +
-                    "reqWidth=" + reqWidth +
+                    "config=" + config +
+                    ", reqWidth=" + reqWidth +
                     ", reqHeight=" + reqHeight +
-                    ", config=" + config +
+                    ", centerInside=" + centerInside +
                     '}';
         }
 
@@ -210,7 +206,7 @@ public class Task {
 
         private Uri uri;
         private String stableKey;
-        private LoadedFrom reqFrom = LoadedFrom.ANY;
+        private int fromPolicy = From.ANY.policy;
 
         private Target target = EmptyTarget.EMPTY;
         private Drawable loadingDrawable;
@@ -225,9 +221,11 @@ public class Task {
             this.options = vanGogh.defaultOptions();
         }
 
-        public Creator from(LoadedFrom reqFrom) {
-            if (reqFrom == null) throw new NullPointerException("reqFrom == null");
-            this.reqFrom = reqFrom;
+        public Creator from(int fromPolicy) {
+            if ((fromPolicy & From.ANY.policy) == 0) {
+                throw new IllegalArgumentException("illegal fromPolicy");
+            }
+            this.fromPolicy = fromPolicy;
             return this;
         }
 
@@ -284,11 +282,12 @@ public class Task {
         public void into(Target target) {
             if (target == null) throw new NullPointerException("target == null");
             this.target = target;
-            if (!vanGogh.debug() && (reqFrom == LoadedFrom.ANY || reqFrom == LoadedFrom.MEMORY)) {
+            int policy = this.fromPolicy & From.MEMORY.policy;
+            if (!vanGogh.debug() && policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
                     LogUtils.i("quick memory success.");
-                    this.target.onSuccess(bitmap, LoadedFrom.MEMORY);
+                    this.target.onSuccess(bitmap, From.MEMORY);
                     return;
                 }
             }

@@ -89,9 +89,15 @@ class Dispatcher {
                 if (result != null || task.getExecutedCount() >= vanGogh.retryCount()) {
                     iterator.remove();
 
-                    LogUtils.e("Dispatcher", "waiting tasks = " + waitingTasks.size()
-                            + "\n waiting calls = " + waitingCalls.size()
-                            + "\n executing calls = " + executingCalls.size());
+                    int wt = waitingTasks.size();
+                    int wc = waitingCalls.size();
+                    int ec = executingCalls.size();
+                    LogUtils.e("Dispatcher", "waiting tasks = " + wt
+                            + "\n waiting calls = " + wc
+                            + "\n executing calls = " + ec);
+                    if (wt == 0 && wc == 0 && ec == 1) {
+                        LogUtils.i("Dispatcher", executingCalls.iterator().next().toString());
+                    }
                 }
             }
         }

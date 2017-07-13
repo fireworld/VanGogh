@@ -18,11 +18,11 @@ class MemoryCacheInterceptor implements Interceptor {
     @Override
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
-        LoadedFrom from = task.reqFrom();
-        if (from == LoadedFrom.ANY || from == LoadedFrom.MEMORY) {
+        int fromPolicy = task.fromPolicy() & From.MEMORY.policy;
+        if (fromPolicy != 0) {
             Bitmap bitmap = memoryCache.get(task.stableKey());
             if (bitmap != null) {
-                return new Result(bitmap, LoadedFrom.MEMORY);
+                return new Result(bitmap, From.MEMORY);
             }
         }
         Result result = chain.proceed(task);

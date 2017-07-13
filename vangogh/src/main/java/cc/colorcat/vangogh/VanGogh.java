@@ -241,7 +241,7 @@ public class VanGogh {
             try {
                 diskCache = DiskCache.open(cacheDirectory, diskCacheSize);
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtils.e(e);
             }
             if (executor == null) {
                 executor = new ThreadPoolExecutor(maxRunning, 10, 60L, TimeUnit.SECONDS,

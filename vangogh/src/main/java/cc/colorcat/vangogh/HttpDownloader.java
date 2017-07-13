@@ -32,7 +32,7 @@ class HttpDownloader implements Downloader {
                 InputStream is = conn.getInputStream();
                 long contentLength = conn.getContentLength();
                 if (is != null && contentLength > 0) {
-                    return new Result(is, contentLength, LoadedFrom.NETWORK);
+                    return new Result(is, contentLength, From.NETWORK);
                 }
             }
             throw new IOException("network error, code = " + code + ", msg = " + conn.getResponseMessage());

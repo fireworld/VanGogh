@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.colorcat.vangogh.From;
 import cc.colorcat.vangogh.VanGogh;
 
 
@@ -80,7 +81,8 @@ public class MainActivity extends Activity {
                         .setText(R.id.tv_description, courseBean.getDescription());
                 ImageView imageView = holder.getView(R.id.iv_icon);
 //                Picasso.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).memoryPolicy(MemoryPolicy.NO_CACHE).networkPolicy(NetworkPolicy.NO_CACHE).into(imageView);
-//                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).loading(R.mipmap.ic_launcher_round).from(LoadedFrom.NETWORK).into(imageView);
+//                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).loading(R.mipmap.ic_launcher_round).from(From.NETWORK).into(imageView);
+                int policy = From.NETWORK.policy | From.DISK.policy | From.MEMORY.policy;
                 VanGogh.with(imageView.getContext()).load(courseBean.getPicBigUrl()).resize(100, 100).into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());

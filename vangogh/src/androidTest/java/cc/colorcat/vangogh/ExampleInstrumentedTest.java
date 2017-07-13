@@ -44,10 +44,6 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void clone_test() throws Exception {
-        Task.Options o1 = new Task.Options(10, 10, Bitmap.Config.ARGB_8888);
-        String s1 = o1.toString();
-        Task.Options o2 = o1.clone();
-        String s2 = o2.toString();
     }
 
     private static class TaskComparator implements Comparator<Task> {

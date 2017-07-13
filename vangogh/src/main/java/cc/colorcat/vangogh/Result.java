@@ -13,9 +13,9 @@ public final class Result {
     private final Bitmap bitmap;
     private final InputStream stream;
     private final long contentLength;
-    private final LoadedFrom from;
+    private final From from;
 
-    public Result(Bitmap bitmap, LoadedFrom from) {
+    public Result(Bitmap bitmap, From from) {
         if (bitmap == null) {
             throw new NullPointerException("bitmap == null");
         }
@@ -28,7 +28,7 @@ public final class Result {
         this.from = from;
     }
 
-    public Result(InputStream is, long contentLength, LoadedFrom from) {
+    public Result(InputStream is, long contentLength, From from) {
         if (is == null) {
             throw new NullPointerException("is == null");
         }
@@ -53,7 +53,7 @@ public final class Result {
         return contentLength;
     }
 
-    LoadedFrom from() {
+    From from() {
         return from;
     }
 }

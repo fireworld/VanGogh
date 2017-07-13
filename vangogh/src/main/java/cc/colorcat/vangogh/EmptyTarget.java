@@ -22,7 +22,7 @@ class EmptyTarget implements Target {
     }
 
     @Override
-    public void onSuccess(Bitmap bitmap, LoadedFrom from) {
+    public void onSuccess(Bitmap bitmap, From from) {
 
     }
 
