@@ -9,14 +9,20 @@ import android.support.annotation.ColorInt;
  */
 
 public enum LoadedFrom {
-    ANY(Color.TRANSPARENT),
-    MEMORY(Color.GREEN),
-    DISK(Color.BLUE),
-    NETWORK(Color.RED);
+    ANY(Color.TRANSPARENT, LoadedFrom.POLICY_MEMORY | LoadedFrom.POLICY_DISK | LoadedFrom.POLICY_NETWORK),
+    MEMORY(Color.GREEN, LoadedFrom.POLICY_MEMORY),
+    DISK(Color.BLUE, LoadedFrom.POLICY_DISK),
+    NETWORK(Color.RED, LoadedFrom.POLICY_NETWORK);
 
     final int debugColor;
+    final int policy;
 
-    private LoadedFrom(@ColorInt int debugColor) {
+    private static final int POLICY_MEMORY = 0x0001;
+    private static final int POLICY_DISK = 0x0002;
+    private static final int POLICY_NETWORK = 0x0004;
+
+    private LoadedFrom(@ColorInt int debugColor, int policy) {
         this.debugColor = debugColor;
+        this.policy = policy;
     }
 }
