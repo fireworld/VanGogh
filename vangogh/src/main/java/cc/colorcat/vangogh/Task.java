@@ -263,6 +263,7 @@ public class Task {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId, null);
             } else {
+                //noinspection deprecation
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId);
             }
             return this;
