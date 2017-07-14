@@ -21,7 +21,7 @@ public enum From {
     private static final int POLICY_DISK = 1 << 1;
     private static final int POLICY_NETWORK = 1 << 2;
 
-    private From(@ColorInt int debugColor, int policy) {
+    From(@ColorInt int debugColor, int policy) {
         this.debugColor = debugColor;
         this.policy = policy;
     }

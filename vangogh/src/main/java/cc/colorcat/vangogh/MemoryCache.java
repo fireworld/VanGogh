@@ -1,6 +1,5 @@
 package cc.colorcat.vangogh;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
@@ -12,7 +11,7 @@ import java.util.Map;
  * xx.ch@outlook.com
  */
 
-public class MemoryCache implements Cache<Bitmap> {
+class MemoryCache implements Cache<Bitmap> {
     private final LinkedHashMap<String, Bitmap> map;
     private final int maxSize;
 
@@ -22,11 +21,7 @@ public class MemoryCache implements Cache<Bitmap> {
     private int hitCount;
     private int missCount;
 
-    public MemoryCache(Context ctx) {
-        this(Utils.calculateMemoryCacheSize(ctx));
-    }
-
-    public MemoryCache(int maxSize) {
+    MemoryCache(int maxSize) {
         if (maxSize <= 0) {
             throw new IllegalArgumentException("Max size must be positive.");
         }

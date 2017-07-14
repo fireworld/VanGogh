@@ -221,6 +221,18 @@ public class Task {
             this.options = vanGogh.defaultOptions();
         }
 
+        /**
+         * 数据来源策略配置，含内存、磁盘、网络三种基本模式，也可将三种模式组合使用
+         * 如默认的 {@link From#ANY#policy} 即是将三种模式组合使用，会按照优先内存，其次磁盘，最后网络的方式获取
+         * 如需其它的组合方式，可使用如下形式：
+         * 只从内存和磁盘：<code>From.MEMORY.policy | From.DISK.policy</code>
+         * 只从内存和网络：<code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * ...
+         *
+         * @param fromPolicy {@link From#MEMORY#policy}, {@link From#DISK#policy},
+         *                   {@link From#NETWORK#policy}, {@link From#ANY#policy}
+         * @see From
+         */
         public Creator from(int fromPolicy) {
             if ((fromPolicy & From.ANY.policy) == 0) {
                 throw new IllegalArgumentException("illegal fromPolicy");

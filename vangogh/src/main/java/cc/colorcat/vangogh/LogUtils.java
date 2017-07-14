@@ -10,81 +10,81 @@ import java.lang.annotation.RetentionPolicy;
  * Created by cxx on 16-3-8.
  * xx.ch@outlook.com
  */
-public final class LogUtils {
+final class LogUtils {
     private static final String TAG = "Temp";
-    public static final int VERBOSE = Log.VERBOSE;
-    public static final int DEBUG = Log.DEBUG;
-    public static final int INFO = Log.INFO;
-    public static final int WARN = Log.WARN;
-    public static final int ERROR = Log.ERROR;
+    static final int VERBOSE = Log.VERBOSE;
+    static final int DEBUG = Log.DEBUG;
+    static final int INFO = Log.INFO;
+    static final int WARN = Log.WARN;
+    static final int ERROR = Log.ERROR;
     private static final int NOTHING = 10;
     private static int level = NOTHING;
 
-    public static void init(boolean debug) {
+    static void init(boolean debug) {
         level = debug ? VERBOSE : NOTHING;
     }
 
-    public static void v(String msg) {
+    static void v(String msg) {
         v(TAG, msg);
     }
 
-    public static void v(String tag, String msg) {
+    static void v(String tag, String msg) {
         if (VERBOSE >= level) {
             Log.v(tag, msg);
         }
     }
 
-    public static void d(String msg) {
+    static void d(String msg) {
         d(TAG, msg);
     }
 
-    public static void d(String tag, String msg) {
+    static void d(String tag, String msg) {
         if (DEBUG >= level) {
             Log.d(tag, msg);
         }
     }
 
-    public static void i(String msg) {
+    static void i(String msg) {
         i(TAG, msg);
     }
 
-    public static void i(String tag, String msg) {
+    static void i(String tag, String msg) {
         if (INFO >= level) {
             Log.i(tag, msg);
         }
     }
 
-    public static void w(String msg) {
+    static void w(String msg) {
         w(TAG, msg);
     }
 
-    public static void w(String tag, String msg) {
+    static void w(String tag, String msg) {
         if (WARN >= level) {
             Log.w(tag, msg);
         }
     }
 
-    public static void e(String msg) {
+    static void e(String msg) {
         e(TAG, msg);
     }
 
-    public static void e(String tag, String msg) {
+    static void e(String tag, String msg) {
         if (ERROR >= level) {
             Log.e(tag, msg);
         }
     }
 
-    public static void e(Throwable e) {
+    static void e(Throwable e) {
         if (ERROR >= level) {
             e.printStackTrace();
         }
     }
 
-    public static void ll(String tag, String msg, @Level int level) {
+    static void ll(String tag, String msg, @Level int level) {
         Log.println(level, tag, msg);
     }
 
-    public static void ll(String msg, @Level int level) {
+    static void ll(String msg, @Level int level) {
         Log.println(level, TAG, msg);
     }
 
@@ -94,6 +94,6 @@ public final class LogUtils {
 
     @IntDef({VERBOSE, DEBUG, INFO, WARN, ERROR})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Level {
+    @interface Level {
     }
 }
