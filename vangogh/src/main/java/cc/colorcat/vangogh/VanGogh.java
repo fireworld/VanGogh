@@ -23,19 +23,20 @@ import java.util.concurrent.TimeUnit;
 public class VanGogh {
     private static volatile VanGogh singleton;
 
-    private Dispatcher dispatcher;
-    private int maxRunning;
-    private int retryCount;
+    private final Dispatcher dispatcher;
+    private final int maxRunning;
+    private final int retryCount;
 
-    private List<Interceptor> interceptors;
-    private Downloader downloader;
+    private final List<Interceptor> interceptors;
+    private final Downloader downloader;
+    private final int defaultFromPolicy;
 
-    private Cache<Bitmap> memoryCache;
-    private DiskCache diskCache;
+    private final Cache<Bitmap> memoryCache;
+    private final DiskCache diskCache;
 
-    private Task.Options defaultOptions;
-    private Resources resources;
-    private boolean debug;
+    private final Task.Options defaultOptions;
+    private final Resources resources;
+    private final boolean debug;
 
     public static void setSingleton(VanGogh vanGogh) {
         synchronized (VanGogh.class) {
@@ -62,6 +63,7 @@ public class VanGogh {
         retryCount = builder.retryCount;
         interceptors = Collections.unmodifiableList(new ArrayList<>(builder.interceptors));
         downloader = builder.downloader;
+        defaultFromPolicy = builder.defaultFromPolicy;
         defaultOptions = builder.defaultOptions;
         resources = builder.resources;
         debug = builder.debug;
@@ -109,6 +111,10 @@ public class VanGogh {
         return downloader;
     }
 
+    int defaultFromPolicy() {
+        return defaultFromPolicy;
+    }
+
     Cache<Bitmap> memoryCache() {
         return memoryCache;
     }
@@ -137,6 +143,7 @@ public class VanGogh {
 
         private List<Interceptor> interceptors = new ArrayList<>();
         private Downloader downloader;
+        private int defaultFromPolicy = From.ANY.policy;
 
         private long memoryCacheSize;
         private File cacheDirectory;
@@ -193,6 +200,12 @@ public class VanGogh {
                 throw new NullPointerException("downloader == null");
             }
             this.downloader = downloader;
+            return this;
+        }
+
+        public Builder defaultFromPolicy(int fromPolicy) {
+            From.checkFromPolicy(fromPolicy);
+            this.defaultFromPolicy = fromPolicy;
             return this;
         }
 

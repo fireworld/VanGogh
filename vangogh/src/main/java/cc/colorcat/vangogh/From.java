@@ -21,6 +21,12 @@ public enum From {
     private static final int POLICY_DISK = 1 << 1;
     private static final int POLICY_NETWORK = 1 << 2;
 
+    public static void checkFromPolicy(int fromPolicy) {
+        if ((fromPolicy & From.ANY.policy) == 0) {
+            throw new IllegalArgumentException("illegal fromPolicy = " + fromPolicy);
+        }
+    }
+
     From(@ColorInt int debugColor, int policy) {
         this.debugColor = debugColor;
         this.policy = policy;
