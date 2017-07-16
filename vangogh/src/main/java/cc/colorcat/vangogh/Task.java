@@ -141,8 +141,23 @@ public class Task {
             return config;
         }
 
+        public void config(Bitmap.Config config) {
+            if (config == null) throw new NullPointerException("config == null");
+            this.config = config;
+        }
+
         public boolean hasSize() {
             return reqWidth != 0 && reqHeight != 0;
+        }
+
+        public void reqWidth(int width) {
+            if (width < 1) throw new IllegalArgumentException("width < 1");
+            this.reqWidth = width;
+        }
+
+        public void reqHeight(int height) {
+            if (height < 1) throw new IllegalArgumentException("height < 1");
+            this.reqHeight = height;
         }
 
         public int reqWidth() {
@@ -151,6 +166,10 @@ public class Task {
 
         public int reqHeight() {
             return reqHeight;
+        }
+
+        public void centerInside(boolean centerInside) {
+            this.centerInside = centerInside;
         }
 
         public boolean centerInside() {
@@ -206,7 +225,7 @@ public class Task {
 
         private Uri uri;
         private String stableKey;
-        private int fromPolicy = From.ANY.policy;
+        private int fromPolicy;
 
         private Target target = EmptyTarget.EMPTY;
         private Drawable loadingDrawable;
@@ -218,13 +237,24 @@ public class Task {
             this.vanGogh = vanGogh;
             this.uri = uri;
             this.stableKey = stableKey;
+            this.fromPolicy = vanGogh.defaultFromPolicy();
             this.options = vanGogh.defaultOptions();
         }
 
+        /**
+         * 数据来源策略配置，含内存、磁盘、网络三种基本模式，也可将三种模式组合使用
+         * 如默认的 {@link From#ANY#policy} 即是将三种模式组合使用，会按照优先内存，其次磁盘，最后网络的方式获取
+         * 如需其它的组合方式，可使用如下形式：
+         * 只从内存和磁盘：<code>From.MEMORY.policy | From.DISK.policy</code>
+         * 只从内存和网络：<code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * ...
+         *
+         * @param fromPolicy {@link From#MEMORY#policy}, {@link From#DISK#policy},
+         *                   {@link From#NETWORK#policy}, {@link From#ANY#policy}
+         * @see From
+         */
         public Creator from(int fromPolicy) {
-            if ((fromPolicy & From.ANY.policy) == 0) {
-                throw new IllegalArgumentException("illegal fromPolicy");
-            }
+            From.checkFromPolicy(fromPolicy);
             this.fromPolicy = fromPolicy;
             return this;
         }
@@ -233,6 +263,7 @@ public class Task {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId, null);
             } else {
+                //noinspection deprecation
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId);
             }
             return this;
@@ -286,7 +317,7 @@ public class Task {
             if (!vanGogh.debug() && policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-                    LogUtils.i("quick memory success.");
+//                    LogUtils.i("quick memory success.");
                     this.target.onSuccess(bitmap, From.MEMORY);
                     return;
                 }
