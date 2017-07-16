@@ -3,6 +3,7 @@ package cc.colorcat.vangogh;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by cxx on 2017/7/11.
@@ -11,10 +12,19 @@ import java.util.List;
 class RealCall implements Call {
     private final VanGogh vanGogh;
     private final Task task;
+    private AtomicInteger count = new AtomicInteger(0);
 
     RealCall(VanGogh vanGogh, Task task) {
         this.vanGogh = vanGogh;
         this.task = task;
+    }
+
+    public int getCount() {
+        return count.get();
+    }
+
+    public int getAndIncrement() {
+        return count.getAndIncrement();
     }
 
     @Override
@@ -66,7 +76,9 @@ class RealCall implements Call {
     @Override
     public String toString() {
         return "RealCall{" +
-                "task=" + task +
+                "vanGogh=" + vanGogh +
+                ", task=" + task +
+                ", count=" + count +
                 '}';
     }
 }

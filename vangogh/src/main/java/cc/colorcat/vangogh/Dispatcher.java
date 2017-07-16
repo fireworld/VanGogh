@@ -50,14 +50,6 @@ class Dispatcher {
                 executor.submit(new AsyncCall(call));
             }
         }
-
-//        if (executingCalls.size() >= vanGogh.maxRunning()) return;
-//        for (RealCall call = waitingCalls.poll(); call != null; call = waitingCalls.poll()) {
-//            if (executingCalls.add(call)) {
-//                executor.submit(new AsyncCall(call));
-//                if (executingCalls.size() >= vanGogh.maxRunning()) return;
-//            }
-//        }
     }
 
     private void completeCall(final RealCall call, final Result result, final Exception cause) {
@@ -67,42 +59,21 @@ class Dispatcher {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                deliver(call.task().stableKey(), result, cause);
-            }
-        });
-//        executingCalls.remove(call);
-        if (executingCalls.remove(call) |
-                (cause != null
-                        && call.task().getAndIncrementExecutedCount() < vanGogh.retryCount()
-                        && !waitingCalls.contains(call)
-                        && waitingCalls.offer(call))) {
-            promoteTask();
-        }
-    }
-
-    private void deliver(String stableKey, Result result, Exception e) {
-        Iterator<Task> iterator = waitingTasks.iterator();
-        while (iterator.hasNext()) {
-            Task task = iterator.next();
-            if (stableKey.equals(task.stableKey())) {
-                task.onPostResult(result, e);
-                if (result != null || task.getExecutedCount() >= vanGogh.retryCount()) {
-                    iterator.remove();
-
-//                    int wt = waitingTasks.size();
-//                    int wc = waitingCalls.size();
-//                    int ec = executingCalls.size();
-//                    LogUtils.e("Dispatcher", "waiting tasks = " + wt
-//                            + "\n waiting calls = " + wc
-//                            + "\n executing calls = " + ec);
-//                    if (wt == 0 && wc == 0 && ec == 1) {
-//                        LogUtils.i("Dispatcher", executingCalls.iterator().next().toString());
-//                    }
+                String stableKey = call.task().stableKey();
+                Iterator<Task> iterator = waitingTasks.iterator();
+                while (iterator.hasNext()) {
+                    Task task = iterator.next();
+                    if (stableKey.equals(task.stableKey())) {
+                        task.onPostResult(result, cause);
+                        iterator.remove();
+                        LogUtils.d("Dispatcher", "waiting tasks = " + waitingTasks.size()
+                                + "\n waiting calls = " + waitingCalls.size()
+                                + "\n executing calls = " + executingCalls.size());
+                    }
                 }
             }
-        }
+        });
     }
-
 
     private class AsyncCall implements Runnable {
         private RealCall call;
@@ -121,9 +92,19 @@ class Dispatcher {
                 LogUtils.e(e);
                 cause = e;
             } catch (IndexOutOfBoundsException e) {
+                LogUtils.e(e);
                 cause = new UnsupportedOperationException("unsupported uri: " + call.task().uri());
             } finally {
-                completeCall(call, result, cause);
+                executingCalls.remove(call);
+                if (result != null || call.getAndIncrement() >= vanGogh.retryCount()) {
+                    completeCall(call, result, cause);
+                } else if (!waitingCalls.contains(call)) {
+                    waitingCalls.offer(call);
+                }
+                LogUtils.e("Dispatcher", "waiting tasks = " + waitingTasks.size()
+                        + "\n waiting calls = " + waitingCalls.size()
+                        + "\n executing calls = " + executingCalls.size());
+                promoteTask();
             }
         }
     }
