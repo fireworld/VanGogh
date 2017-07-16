@@ -7,8 +7,6 @@ import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.widget.ImageView;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Created by cxx on 2017/7/11.
  * xx.ch@outlook.com
@@ -17,7 +15,6 @@ public class Task {
     private Uri uri;
     private String stableKey;
     private int fromPolicy;
-    private AtomicInteger executedCount = new AtomicInteger(0);
 
     private Target target;
     private Drawable loadingDrawable;
@@ -59,14 +56,6 @@ public class Task {
 
     public Options options() {
         return options;
-    }
-
-    int getAndIncrementExecutedCount() {
-        return executedCount.getAndIncrement();
-    }
-
-    int getExecutedCount() {
-        return executedCount.get();
     }
 
     void onPreExecute() {
@@ -118,7 +107,6 @@ public class Task {
                 "uri=" + uri +
                 ", stableKey='" + stableKey + '\'' +
                 ", fromPolicy=" + fromPolicy +
-                ", executedCount=" + executedCount +
                 ", target=" + target +
                 ", loadingDrawable=" + loadingDrawable +
                 ", errorDrawable=" + errorDrawable +
