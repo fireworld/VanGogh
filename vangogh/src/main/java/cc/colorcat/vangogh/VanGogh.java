@@ -38,6 +38,8 @@ public class VanGogh {
     private final Resources resources;
     private final boolean debug;
 
+    private final List<Transformation> transformations;
+
     public static void setSingleton(VanGogh vanGogh) {
         synchronized (VanGogh.class) {
             if (singleton != null) {
@@ -61,12 +63,13 @@ public class VanGogh {
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
-        interceptors = Collections.unmodifiableList(new ArrayList<>(builder.interceptors));
+        interceptors = Utils.immutableList(builder.interceptors);
         downloader = builder.downloader;
         defaultFromPolicy = builder.defaultFromPolicy;
         defaultOptions = builder.defaultOptions;
         resources = builder.resources;
         debug = builder.debug;
+        transformations = Utils.immutableList(builder.transformations);
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
@@ -131,6 +134,10 @@ public class VanGogh {
         return debug;
     }
 
+    List<Transformation> transformations() {
+        return transformations;
+    }
+
     Bitmap quickMemoryCacheCheck(String stableKey) {
         return memoryCache.get(stableKey);
     }
@@ -141,7 +148,7 @@ public class VanGogh {
         private int maxRunning = 6;
         private int retryCount = 1;
 
-        private List<Interceptor> interceptors = new ArrayList<>();
+        private List<Interceptor> interceptors = new ArrayList<>(4);
         private Downloader downloader;
         private int defaultFromPolicy = From.ANY.policy;
 
@@ -152,6 +159,8 @@ public class VanGogh {
         private Task.Options defaultOptions;
         private Resources resources;
         private boolean debug = false;
+
+        private List<Transformation> transformations = new ArrayList<>(4);
 
         public Builder(Context context) {
             if (context == null) throw new NullPointerException("context == null");
@@ -241,6 +250,14 @@ public class VanGogh {
 
         public Builder debug(boolean debug) {
             this.debug = debug;
+            return this;
+        }
+
+        public Builder addTransformation(Transformation transformation) {
+            if (transformation == null) {
+                throw new NullPointerException("transformation == null");
+            }
+            this.transformations.add(transformation);
             return this;
         }
 

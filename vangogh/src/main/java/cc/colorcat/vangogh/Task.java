@@ -7,6 +7,9 @@ import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by cxx on 2017/7/11.
  * xx.ch@outlook.com
@@ -22,6 +25,8 @@ public class Task {
 
     private Options options;
 
+    private List<Transformation> transformations;
+
     private Task(Creator creator) {
         uri = creator.uri;
         stableKey = creator.stableKey;
@@ -30,6 +35,7 @@ public class Task {
         loadingDrawable = creator.loadingDrawable;
         errorDrawable = creator.errorDrawable;
         options = creator.options;
+        transformations = Utils.immutableList(creator.transformations);
     }
 
     Task(String url) {
@@ -56,6 +62,10 @@ public class Task {
 
     public Options options() {
         return options;
+    }
+
+    public List<Transformation> transformations() {
+        return transformations;
     }
 
     void onPreExecute() {
@@ -119,7 +129,11 @@ public class Task {
         private Bitmap.Config config = Bitmap.Config.ARGB_8888;
         private int reqWidth = 0;
         private int reqHeight = 0;
-        private boolean centerInside = false;
+        private float rotationDegrees;
+        private boolean hasRotation;
+        private float rotationPivotX;
+        private float rotationPivotY;
+        private boolean hasRotationPivot;
 
         Options() {
 
@@ -138,13 +152,11 @@ public class Task {
             return reqWidth != 0 && reqHeight != 0;
         }
 
-        public void reqWidth(int width) {
-            if (width < 1) throw new IllegalArgumentException("width < 1");
+        public void resize(int width, int height) {
+            if (width < 1 || height < 1) {
+                throw new IllegalArgumentException("width < 1 || height < 1");
+            }
             this.reqWidth = width;
-        }
-
-        public void reqHeight(int height) {
-            if (height < 1) throw new IllegalArgumentException("height < 1");
             this.reqHeight = height;
         }
 
@@ -156,35 +168,36 @@ public class Task {
             return reqHeight;
         }
 
-        public void centerInside(boolean centerInside) {
-            this.centerInside = centerInside;
+        public void rotate(float degrees, float pivotX, float pivotY) {
+            rotate(degrees);
+            rotationPivotX = pivotX;
+            rotationPivotY = pivotY;
+            hasRotationPivot = true;
         }
 
-        public boolean centerInside() {
-            return centerInside;
+        public void rotate(float degrees) {
+            rotationDegrees = degrees;
+            hasRotation = true;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Options options = (Options) o;
-
-            if (reqWidth != options.reqWidth) return false;
-            if (reqHeight != options.reqHeight) return false;
-            if (centerInside != options.centerInside) return false;
-            return config == options.config;
-
+        public float rotationDegrees() {
+            return rotationDegrees;
         }
 
-        @Override
-        public int hashCode() {
-            int result = config.hashCode();
-            result = 31 * result + reqWidth;
-            result = 31 * result + reqHeight;
-            result = 31 * result + (centerInside ? 1 : 0);
-            return result;
+        public float rotationPivotX() {
+            return rotationPivotX;
+        }
+
+        public float rotationPivotY() {
+            return rotationPivotY;
+        }
+
+        public boolean hasRotation() {
+            return hasRotation;
+        }
+
+        public boolean hasRotationPivot() {
+            return hasRotationPivot;
         }
 
         @Override
@@ -193,7 +206,11 @@ public class Task {
                     "config=" + config +
                     ", reqWidth=" + reqWidth +
                     ", reqHeight=" + reqHeight +
-                    ", centerInside=" + centerInside +
+                    ", rotationDegrees=" + rotationDegrees +
+                    ", hasRotation=" + hasRotation +
+                    ", rotationPivotX=" + rotationPivotX +
+                    ", rotationPivotY=" + rotationPivotY +
+                    ", hasRotationPivot=" + hasRotationPivot +
                     '}';
         }
 
@@ -220,6 +237,8 @@ public class Task {
         private Drawable errorDrawable;
 
         private Options options;
+
+        private List<Transformation> transformations = new ArrayList<>(4);
 
         Creator(VanGogh vanGogh, Uri uri, String stableKey) {
             this.vanGogh = vanGogh;
@@ -279,17 +298,28 @@ public class Task {
         }
 
         public Creator resize(int width, int height) {
-            if (width < 1 || height < 1) {
-                throw new IllegalArgumentException("width < 1 || height < 1");
-            }
-            options.reqWidth = width;
-            options.reqHeight = height;
+            options.resize(width, height);
             return this;
         }
 
         public Creator config(Bitmap.Config config) {
-            if (config == null) throw new NullPointerException("config == null");
-            options.config = config;
+            options.config(config);
+            return this;
+        }
+
+        public Creator rotate(float degrees) {
+            options.rotate(degrees);
+            return this;
+        }
+
+        public Creator rotate(float degrees, float pivotX, float pivotY) {
+            options.rotate(degrees, pivotX, pivotY);
+            return this;
+        }
+
+        public Creator addTransformation(Transformation transformation) {
+            if (transformation == null) throw new NullPointerException("transformation == null");
+            transformations.add(transformation);
             return this;
         }
 

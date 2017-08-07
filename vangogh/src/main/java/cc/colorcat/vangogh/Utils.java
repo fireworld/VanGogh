@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Looper;
 import android.support.annotation.ColorInt;
@@ -20,6 +21,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by cxx on 2017/7/6.
@@ -27,6 +31,10 @@ import java.security.NoSuchAlgorithmException;
  */
 
 class Utils {
+
+    static <T> List<T> immutableList(List<T> list) {
+        return Collections.unmodifiableList(new ArrayList<>(list));
+    }
 
     static void checkMain() {
         if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
@@ -249,18 +257,50 @@ class Utils {
         }
     }
 
+//    private static int calculateInSampleSize(BitmapFactory.Options bo, Task.Options to) {
+//        final int reqWidth = to.reqWidth();
+//        final int reqHeight = to.reqHeight();
+//        final int width = bo.outWidth;
+//        final int height = bo.outHeight;
+//        int sampleSize = 1;
+//        if (height > reqHeight || width > reqWidth) {
+//            final int heightRatio = (int) Math.floor((float) height / (float) reqHeight);
+//            final int widthRatio = (int) Math.floor((float) width / (float) reqWidth);
+//            sampleSize = to.centerInside() ? Math.max(heightRatio, widthRatio) : Math.min(heightRatio, widthRatio);
+//        }
+//        return sampleSize;
+//    }
+
     private static int calculateInSampleSize(BitmapFactory.Options bo, Task.Options to) {
-        final int reqWidth = to.reqWidth();
-        final int reqHeight = to.reqHeight();
-        final int width = bo.outWidth;
-        final int height = bo.outHeight;
-        int sampleSize = 1;
-        if (height > reqHeight || width > reqWidth) {
-            final int heightRatio = (int) Math.floor((float) height / (float) reqHeight);
-            final int widthRatio = (int) Math.floor((float) width / (float) reqWidth);
-            sampleSize = to.centerInside() ? Math.max(heightRatio, widthRatio) : Math.min(heightRatio, widthRatio);
+        final int reqWidth = to.reqWidth(), reqHeight = to.reqHeight();
+        final int width = bo.outWidth, height = bo.outHeight;
+        int inSampleSize = 1;
+        while (width / inSampleSize > reqWidth && height / inSampleSize > reqHeight) {
+            inSampleSize *= 2;
         }
-        return sampleSize;
+        return inSampleSize;
+    }
+
+    static Bitmap transformResult(Bitmap result, Task.Options ops) {
+        Matrix matrix = new Matrix();
+        final int width = result.getWidth(), height = result.getHeight();
+        if (ops.hasSize()) {
+            final int reqWidth = ops.reqWidth(), reqHeight = ops.reqHeight();
+            if (reqWidth != width || reqHeight != height) {
+                float scaleX = ((float) reqWidth) / width;
+                float scaleY = ((float) reqHeight) / height;
+                float scale = Math.min(scaleX, scaleY);
+                matrix.postScale(scale, scale);
+            }
+        }
+        if (ops.hasRotation()) {
+            if (ops.hasRotationPivot()) {
+                matrix.postRotate(ops.rotationDegrees(), ops.rotationPivotX(), ops.rotationPivotY());
+            } else {
+                matrix.postRotate(ops.rotationDegrees());
+            }
+        }
+        return Bitmap.createBitmap(result, 0, 0, width, height, matrix, true);
     }
 
     private Utils() {

@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cc.colorcat.vangogh.From;
+import cc.colorcat.vangogh.OvalTransformation;
+import cc.colorcat.vangogh.SquareTransformation;
 import cc.colorcat.vangogh.VanGogh;
 
 
@@ -83,7 +85,14 @@ public class MainActivity extends Activity {
 //                Picasso.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).memoryPolicy(MemoryPolicy.NO_CACHE).networkPolicy(NetworkPolicy.NO_CACHE).into(imageView);
 //                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).loading(R.mipmap.ic_launcher_round).from(From.NETWORK).into(imageView);
                 int policy = From.NETWORK.policy | From.DISK.policy | From.MEMORY.policy;
-                VanGogh.with(imageView.getContext()).load(courseBean.getPicBigUrl()).resize(100, 100).into(imageView);
+                VanGogh.with(imageView.getContext())
+                        .load(courseBean.getPicBigUrl())
+                        .resize(100, 100)
+//                        .rotate(-45F)
+//                        .rotate(90F, 50, 50)
+                        .addTransformation(new SquareTransformation())
+                        .addTransformation(new OvalTransformation())
+                        .into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());
 //                Picasso.with(MainActivity.this).load(courseBean.getPicBigUrl()).into(imageView);

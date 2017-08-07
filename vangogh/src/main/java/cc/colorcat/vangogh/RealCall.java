@@ -2,6 +2,7 @@ package cc.colorcat.vangogh;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,11 +40,12 @@ class RealCall implements Call {
 
     private Result getResultWithInterceptor() throws IOException {
         List<Interceptor> users = vanGogh.interceptors();
-        List<Interceptor> interceptors = new ArrayList<>(users.size() + 3);
+        List<Interceptor> interceptors = new ArrayList<>(users.size() + 6);
         interceptors.addAll(users);
         if (vanGogh.debug()) {
             interceptors.add(new WatermarkInterceptor());
         }
+        interceptors.add(new TransformInterceptor(vanGogh.transformations()));
         interceptors.add(new MemoryCacheInterceptor(vanGogh.memoryCache()));
         interceptors.add(new StreamInterceptor());
         DiskCache cache = vanGogh.diskCache();
