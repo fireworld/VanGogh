@@ -3,6 +3,7 @@ package cc.colorcat.vangoghdemo;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.colorcat.vangogh.CircleTransformation;
 import cc.colorcat.vangogh.From;
 import cc.colorcat.vangogh.OvalTransformation;
 import cc.colorcat.vangogh.SquareTransformation;
@@ -87,11 +89,12 @@ public class MainActivity extends Activity {
                 int policy = From.NETWORK.policy | From.DISK.policy | From.MEMORY.policy;
                 VanGogh.with(imageView.getContext())
                         .load(courseBean.getPicBigUrl())
-                        .resize(100, 100)
+//                        .resize(200, 200)
 //                        .rotate(-45F)
 //                        .rotate(90F, 50, 50)
-                        .addTransformation(new SquareTransformation())
-                        .addTransformation(new OvalTransformation())
+//                        .addTransformation(new SquareTransformation())
+//                        .addTransformation(new OvalTransformation())
+                        .addTransformation(new CircleTransformation(10, Color.WHITE ))
                         .into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());

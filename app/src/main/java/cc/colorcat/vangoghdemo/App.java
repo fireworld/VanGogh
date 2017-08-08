@@ -15,6 +15,11 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        VanGogh.setSingleton(new VanGogh.Builder(this).debug(BuildConfig.DEBUG).enableLog(true).build());
+        VanGogh vanGogh = new VanGogh.Builder(this)
+                .debug(BuildConfig.DEBUG)
+                .enableLog(true)
+                .maxRunning(1)
+                .build();
+        VanGogh.setSingleton(vanGogh);
     }
 }

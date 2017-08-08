@@ -35,14 +35,13 @@ class DiskCacheInterceptor implements Interceptor {
             OutputStream os = snapshot.getOutputStream();
             if (os != null) {
                 InputStream is = result.stream();
-                if (Utils.dumpAndCloseQuietly(is, os)) {
-                    is = snapshot.getInputStream();
-                    long contentLength = snapshot.getContentLength();
-                    if (is != null && contentLength > 0L) {
-                        return new Result(is, contentLength, resultFrom);
-                    }
-                    throw new IOException("DiskCache reporting error");
+                Utils.dumpAndClose(is, os);
+                is = snapshot.getInputStream();
+                long contentLength = snapshot.getContentLength();
+                if (is != null && contentLength > 0L) {
+                    return new Result(is, contentLength, resultFrom);
                 }
+                throw new IOException("DiskCache reporting error");
             }
         }
         return result;

@@ -3,6 +3,7 @@ package cc.colorcat.vangogh;
 import android.graphics.Bitmap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,25 +13,19 @@ import java.util.List;
  */
 
 class TransformInterceptor implements Interceptor {
-    private List<Transformation> transformations = new LinkedList<>();
+    private List<Transformation> transformations;
 
     TransformInterceptor(List<Transformation> transformations) {
-        this.transformations.addAll(transformations);
+        this.transformations = new ArrayList<>(transformations);
     }
 
     @Override
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
         Result result = chain.proceed(task);
-        Bitmap bitmap = result.bitmap();
-        Task.Options options = task.options();
-        if (options.hasSize() || options.hasRotation()) {
-            bitmap = Utils.transformResult(result.bitmap(), options);
-        }
-        transformations.addAll(task.transformations());
-        for (Transformation transformation : transformations) {
-            bitmap = transformation.transform(bitmap);
-        }
+        List<Transformation> trans = new LinkedList<>(transformations);
+        trans.addAll(task.transformations());
+        Bitmap bitmap = Utils.transformResult(result.bitmap(), task.options(), trans);
         return new Result(bitmap, result.from());
     }
 }

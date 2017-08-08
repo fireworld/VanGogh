@@ -56,7 +56,7 @@ class Utils {
         paint.setStyle(Paint.Style.FILL);
         int r = size >> 1;
         canvas.drawCircle(r, r, r, paint);
-        canvas.save();
+//        canvas.save();
         return result;
     }
 
@@ -82,14 +82,19 @@ class Utils {
         return file.length();
     }
 
-    static void justDump(InputStream is, OutputStream os) throws IOException {
+    static void dumpAndClose(InputStream is, OutputStream os) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
         BufferedOutputStream bos = new BufferedOutputStream(os);
-        byte[] buffer = new byte[4096];
-        for (int length = bis.read(buffer); length != -1; length = bis.read(buffer)) {
-            bos.write(buffer, 0, length);
+        try {
+            byte[] buffer = new byte[4096];
+            for (int length = bis.read(buffer); length != -1; length = bis.read(buffer)) {
+                bos.write(buffer, 0, length);
+            }
+            bos.flush();
+        } finally {
+            close(bis);
+            close(bos);
         }
-        bos.flush();
     }
 
     static boolean dumpAndCloseQuietly(InputStream is, OutputStream os) {
@@ -185,7 +190,7 @@ class Utils {
         return BitmapFactory.decodeStream(is);
     }
 
-    static byte[] toBytesAndClose(InputStream is) throws IOException {
+    private static byte[] toBytesAndClose(InputStream is) throws IOException {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             byte[] buffer = new byte[4096];
@@ -281,7 +286,20 @@ class Utils {
         return inSampleSize;
     }
 
-    static Bitmap transformResult(Bitmap result, Task.Options ops) {
+    static Bitmap transformResult(Bitmap result, Task.Options ops, List<Transformation> transformations) {
+        Bitmap newResult = result;
+        if (ops.hasSize() || ops.hasRotation()) {
+            newResult = applyOptions(result, ops);
+        }
+        if (!transformations.isEmpty()) {
+            for (Transformation transformation : transformations) {
+                newResult = transformation.transform(newResult);
+            }
+        }
+        return newResult;
+    }
+
+    private static Bitmap applyOptions(Bitmap result, Task.Options ops) {
         Matrix matrix = new Matrix();
         final int width = result.getWidth(), height = result.getHeight();
         if (ops.hasSize()) {

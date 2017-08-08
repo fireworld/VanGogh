@@ -1,6 +1,8 @@
 package cc.colorcat.vangogh;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -8,6 +10,7 @@ import android.support.annotation.DrawableRes;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -15,6 +18,8 @@ import java.util.List;
  * xx.ch@outlook.com
  */
 public class Task {
+    private Resources resources;
+
     private Uri uri;
     private String stableKey;
     private int fromPolicy;
@@ -28,6 +33,7 @@ public class Task {
     private List<Transformation> transformations;
 
     private Task(Creator creator) {
+        resources = creator.vanGogh.resources();
         uri = creator.uri;
         stableKey = creator.stableKey;
         fromPolicy = creator.fromPolicy;
@@ -74,41 +80,10 @@ public class Task {
 
     void onPostResult(Result result, Exception cause) {
         if (result != null) {
-            target.onSuccess(result.bitmap(), result.from());
+            target.onSuccess(new VanGoghDrawable(resources, result.bitmap()), result.from());
         } else if (cause != null) {
             target.onFailed(errorDrawable, cause);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Task task = (Task) o;
-
-        if (fromPolicy != task.fromPolicy) return false;
-        if (!uri.equals(task.uri)) return false;
-        if (!stableKey.equals(task.stableKey)) return false;
-        if (!target.equals(task.target)) return false;
-        if (loadingDrawable != null ? !loadingDrawable.equals(task.loadingDrawable) : task.loadingDrawable != null)
-            return false;
-        if (errorDrawable != null ? !errorDrawable.equals(task.errorDrawable) : task.errorDrawable != null)
-            return false;
-        return options.equals(task.options);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = uri.hashCode();
-        result = 31 * result + stableKey.hashCode();
-        result = 31 * result + fromPolicy;
-        result = 31 * result + target.hashCode();
-        result = 31 * result + (loadingDrawable != null ? loadingDrawable.hashCode() : 0);
-        result = 31 * result + (errorDrawable != null ? errorDrawable.hashCode() : 0);
-        result = 31 * result + options.hashCode();
-        return result;
     }
 
     @Override
@@ -121,9 +96,9 @@ public class Task {
                 ", loadingDrawable=" + loadingDrawable +
                 ", errorDrawable=" + errorDrawable +
                 ", options=" + options +
+                ", transformations=" + transformations +
                 '}';
     }
-
 
     public static class Options implements Cloneable {
         private Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -286,6 +261,7 @@ public class Task {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 errorDrawable = vanGogh.resources().getDrawable(errorResId, null);
             } else {
+                //noinspection deprecation
                 errorDrawable = vanGogh.resources().getDrawable(errorResId);
             }
             return this;
@@ -331,12 +307,18 @@ public class Task {
         public void into(Target target) {
             if (target == null) throw new NullPointerException("target == null");
             this.target = target;
-            int policy = this.fromPolicy & From.MEMORY.policy;
-            if (!vanGogh.debug() && policy != 0) {
+            int policy = fromPolicy & From.MEMORY.policy;
+            if (policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-//                    LogUtils.i("quick memory success.");
-                    this.target.onSuccess(bitmap, From.MEMORY);
+                    LogUtils.i("quick memory success.");
+                    List<Transformation> trans = new LinkedList<>(vanGogh.transformations());
+                    trans.addAll(transformations);
+                    bitmap = Utils.transformResult(bitmap, options, trans);
+                    if (vanGogh.debug()) {
+                        bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor);
+                    }
+                    target.onSuccess(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
                     return;
                 }
             }

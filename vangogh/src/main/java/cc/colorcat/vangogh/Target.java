@@ -12,7 +12,7 @@ public interface Target {
 
     void onStart(@Nullable Drawable placeHolder);
 
-    void onSuccess(Bitmap bitmap, From from);
+    void onSuccess(Drawable drawable, From from);
 
     void onFailed(@Nullable Drawable error, Exception cause);
 }
