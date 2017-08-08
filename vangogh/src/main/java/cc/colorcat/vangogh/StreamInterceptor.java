@@ -21,12 +21,12 @@ class StreamInterceptor implements Interceptor {
             InputStream is = result.stream();
             Task.Options options = task.options();
             if (options.hasSize()) {
-                bitmap = Utils.decodeStream(is, options);
+                bitmap = Utils.decodeStreamAndClose(is, options);
             } else {
-                bitmap = Utils.decodeStream(is);
+                bitmap = Utils.decodeStreamAndClose(is);
             }
             if (bitmap == null) {
-                throw new IOException("decodeStream failed, uri = " + task.uri());
+                throw new IOException("decode failed, uri = " + task.uri());
             }
         }
         return new Result(bitmap, result.from());
