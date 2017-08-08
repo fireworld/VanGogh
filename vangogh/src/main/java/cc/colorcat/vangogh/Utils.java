@@ -185,7 +185,7 @@ class Utils {
         return BitmapFactory.decodeStream(is);
     }
 
-    static byte[] toBytesAndClose(InputStream is) throws IOException {
+    private static byte[] toBytesAndClose(InputStream is) throws IOException {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             byte[] buffer = new byte[4096];
@@ -281,7 +281,20 @@ class Utils {
         return inSampleSize;
     }
 
-    static Bitmap transformResult(Bitmap result, Task.Options ops) {
+    static Bitmap transformResult(Bitmap result, Task.Options ops, List<Transformation> transformations) {
+        Bitmap newResult = result;
+        if (ops.hasSize() || ops.hasRotation()) {
+            newResult = applyOptions(result, ops);
+        }
+        if (!transformations.isEmpty()) {
+            for (Transformation transformation : transformations) {
+                newResult = transformation.transform(newResult);
+            }
+        }
+        return newResult;
+    }
+
+    private static Bitmap applyOptions(Bitmap result, Task.Options ops) {
         Matrix matrix = new Matrix();
         final int width = result.getWidth(), height = result.getHeight();
         if (ops.hasSize()) {

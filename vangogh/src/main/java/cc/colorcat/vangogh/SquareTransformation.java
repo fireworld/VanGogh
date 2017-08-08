@@ -12,6 +12,7 @@ public class SquareTransformation implements Transformation {
     @Override
     public Bitmap transform(Bitmap source) {
         final int width = source.getWidth(), height = source.getHeight();
+        if (width == height) return source;
         final int side = Math.min(width, height);
         final int left = (width - side) >> 1;
         final int top = (height - side) >> 1;
