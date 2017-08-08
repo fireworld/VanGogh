@@ -50,6 +50,9 @@ class Dispatcher {
                 executor.submit(new AsyncCall(call));
             }
         }
+        LogUtils.i("Dispatcher", "waiting tasks = " + waitingTasks.size()
+                + "\n waiting calls = " + waitingCalls.size()
+                + "\n executing calls = " + executingCalls.size());
     }
 
     private void completeCall(final RealCall call, final Result result, final Exception cause) {

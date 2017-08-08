@@ -1,6 +1,5 @@
 package cc.colorcat.vangogh;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 
@@ -22,7 +21,7 @@ class EmptyTarget implements Target {
     }
 
     @Override
-    public void onSuccess(Bitmap bitmap, From from) {
+    public void onSuccess(Drawable drawable, From from) {
 
     }
 

@@ -30,8 +30,8 @@ class ImageViewTarget implements Target {
     }
 
     @Override
-    public void onSuccess(Bitmap bitmap, From from) {
-        setBitmap(bitmap, from);
+    public void onSuccess(Drawable drawable, From from) {
+        setDrawable(drawable);
     }
 
     @Override

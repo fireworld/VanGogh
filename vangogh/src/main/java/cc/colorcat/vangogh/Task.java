@@ -1,6 +1,8 @@
 package cc.colorcat.vangogh;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +18,8 @@ import java.util.List;
  * xx.ch@outlook.com
  */
 public class Task {
+    private Resources resources;
+
     private Uri uri;
     private String stableKey;
     private int fromPolicy;
@@ -29,6 +33,7 @@ public class Task {
     private List<Transformation> transformations;
 
     private Task(Creator creator) {
+        resources = creator.vanGogh.resources();
         uri = creator.uri;
         stableKey = creator.stableKey;
         fromPolicy = creator.fromPolicy;
@@ -75,7 +80,7 @@ public class Task {
 
     void onPostResult(Result result, Exception cause) {
         if (result != null) {
-            target.onSuccess(result.bitmap(), result.from());
+            target.onSuccess(new VanGoghDrawable(resources, result.bitmap()), result.from());
         } else if (cause != null) {
             target.onFailed(errorDrawable, cause);
         }
@@ -306,14 +311,15 @@ public class Task {
             if (policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-//                    LogUtils.i("quick memory success.");
+                    LogUtils.i("quick memory success.");
                     List<Transformation> trans = new LinkedList<>(vanGogh.transformations());
                     trans.addAll(transformations);
                     bitmap = Utils.transformResult(bitmap, options, trans);
                     if (vanGogh.debug()) {
                         bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor);
                     }
-                    target.onSuccess(bitmap, From.MEMORY);
+                    target.onSuccess(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
+                    return;
                 }
             }
             vanGogh.enqueue(new Task(this));
