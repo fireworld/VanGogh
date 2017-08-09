@@ -146,34 +146,30 @@ final class DiskCache {
                     long newLength = dirty.length();
                     Utils.renameTo(dirty, clean, true);
                     size = size - oldLength + newLength;
-                    asyncTrimToSize();
-//                    if (size > maxSize) {
-//                        executor.submit(cleanupCallable);
-//                    }
-//                    trimToSize(maxSize);
+//                    asyncTrimToSize();
                 }
             } else {
                 Utils.deleteIfExists(dirty);
             }
-
-//            if (!success) {
-//                Utils.deleteIfExists(dirty);
-//                if (!clean.exists()) {
-//                    map.remove(snapshot.stableKey);
-//                }
-//            } else if (dirty.exists()) {
-//                long oldLength = clean.length();
-//                long newLength = dirty.length();
-//                Utils.renameTo(dirty, clean, true);
-//                size = size - oldLength + newLength;
-//                trimToSize(maxSize);
-//            } else if (!clean.exists()) {
-//                map.remove(snapshot.stableKey);
-//            }
         } finally {
             snapshot.writing = false;
             snapshot.committed = false;
             snapshot.hasErrors = false;
+            if (snapshot.requiredDelete) {
+                deleteSnapshot(snapshot);
+            }
+            asyncTrimToSize();
+        }
+    }
+
+    private void deleteSnapshot(Snapshot snapshot) throws IOException {
+        File clean = snapshot.getCleanFile();
+        if (clean.exists()) {
+            long length = clean.length();
+            Utils.deleteIfExists(clean);
+            if (map.remove(snapshot.key) != null) {
+                size -= length;
+            }
         }
     }
 
@@ -201,10 +197,14 @@ final class DiskCache {
 
     final class Snapshot {
         private String key;
+
         private int readCount = 0;
+
         private boolean writing = false;
         private boolean committed = false;
         private boolean hasErrors = false;
+
+        private boolean requiredDelete = false;
 
         private Snapshot(String key) {
             this.key = key;
@@ -242,6 +242,17 @@ final class DiskCache {
             }
         }
 
+        void requireDelete() throws IOException {
+            synchronized (DiskCache.this) {
+                if (!requiredDelete) {
+                    requiredDelete = true;
+                    if (readCount == 0 && !writing) {
+                        deleteSnapshot(this);
+                    }
+                }
+            }
+        }
+
         private void completeRead() throws IOException {
             synchronized (DiskCache.this) {
                 --readCount;
@@ -249,8 +260,14 @@ final class DiskCache {
                     throw new IllegalStateException("readCount < 0");
                 }
                 if (readCount == 0) {
-                    if (writing && committed) {
-                        completeWriteSnapshot(this, !hasErrors);
+                    if (writing) {
+                        if (committed) {
+                            completeWriteSnapshot(this, !hasErrors);
+                        }
+                    } else {
+                        if (requiredDelete) {
+                            deleteSnapshot(this);
+                        }
                     }
                 }
             }
@@ -277,6 +294,17 @@ final class DiskCache {
             return new File(directory, key + DIRTY_SUFFIX);
         }
 
+        @Override
+        public String toString() {
+            return "Snapshot{" +
+                    "key='" + key + '\'' +
+                    ", readCount=" + readCount +
+                    ", writing=" + writing +
+                    ", committed=" + committed +
+                    ", hasErrors=" + hasErrors +
+                    ", requiredDelete=" + requiredDelete +
+                    '}';
+        }
 
         private class SnapshotInputStream extends FilterInputStream {
             private boolean closed = false;

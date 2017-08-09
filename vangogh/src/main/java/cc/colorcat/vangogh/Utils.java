@@ -82,6 +82,16 @@ class Utils {
         return file.length();
     }
 
+    static void justDump(InputStream is, OutputStream os) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream(is);
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        byte[] buffer = new byte[4096];
+        for (int length = bis.read(buffer); length != -1; length = bis.read(buffer)) {
+            bos.write(buffer, 0, length);
+        }
+        bos.flush();
+    }
+
     static void dumpAndClose(InputStream is, OutputStream os) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
         BufferedOutputStream bos = new BufferedOutputStream(os);
@@ -108,6 +118,7 @@ class Utils {
             bos.flush();
             return true;
         } catch (IOException e) {
+            LogUtils.e(e);
             return false;
         } finally {
             close(bis);
@@ -186,8 +197,12 @@ class Utils {
         return result;
     }
 
-    static Bitmap decodeStream(InputStream is) {
-        return BitmapFactory.decodeStream(is);
+    static Bitmap decodeStreamAndClose(InputStream is) {
+        try {
+            return BitmapFactory.decodeStream(is);
+        } finally {
+            close(is);
+        }
     }
 
     private static byte[] toBytesAndClose(InputStream is) throws IOException {
@@ -204,7 +219,7 @@ class Utils {
         }
     }
 
-    static Bitmap decodeStream(InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
+    static Bitmap decodeStreamAndClose(InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
         try {
             bis.mark(bis.available());
@@ -239,7 +254,7 @@ class Utils {
         return inSampleSize;
     }
 
-    static Bitmap decodeStream(InputStream is, Task.Options to) throws IOException {
+    static Bitmap decodeStreamAndClose(InputStream is, Task.Options to) throws IOException {
         BufferedInputStream bis = null;
         InputStream resettable = is;
         try {

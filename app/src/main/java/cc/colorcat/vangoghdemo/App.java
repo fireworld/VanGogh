@@ -18,7 +18,7 @@ public class App extends Application {
         VanGogh vanGogh = new VanGogh.Builder(this)
                 .debug(BuildConfig.DEBUG)
                 .enableLog(true)
-                .maxRunning(1)
+//                .maxRunning(1)
                 .build();
         VanGogh.setSingleton(vanGogh);
     }

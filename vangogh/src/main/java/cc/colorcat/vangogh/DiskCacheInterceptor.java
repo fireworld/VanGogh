@@ -1,5 +1,7 @@
 package cc.colorcat.vangogh;
 
+import android.graphics.Bitmap;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,13 +20,13 @@ class DiskCacheInterceptor implements Interceptor {
     @Override
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
+        Task.Options options = task.options();
         int fromPolicy = task.fromPolicy() & From.DISK.policy;
         if (fromPolicy != 0) {
             DiskCache.Snapshot snapshot = diskCache.getSnapshot(task.stableKey());
-            InputStream is = snapshot.getInputStream();
-            long length = snapshot.getContentLength();
-            if (is != null && length > 0L) {
-                return new Result(is, length, From.DISK);
+            Bitmap bitmap = decodeOrDelete(snapshot, options, false);
+            if (bitmap != null) {
+                return new Result(bitmap, From.DISK);
             }
         }
 
@@ -35,14 +37,34 @@ class DiskCacheInterceptor implements Interceptor {
             OutputStream os = snapshot.getOutputStream();
             if (os != null) {
                 InputStream is = result.stream();
-                Utils.dumpAndClose(is, os);
-                is = snapshot.getInputStream();
-                long contentLength = snapshot.getContentLength();
-                if (is != null && contentLength > 0L) {
-                    return new Result(is, contentLength, resultFrom);
+                try {
+                    Utils.dumpAndClose(is, os);
+                    Bitmap bitmap = decodeOrDelete(snapshot, options, true);
+                    result = new Result(bitmap, resultFrom);
+                } catch (IOException e) {
+                    snapshot.requireDelete();
+                    throw e;
                 }
-                throw new IOException("DiskCache reporting error");
             }
+        }
+        return result;
+    }
+
+    private static Bitmap decodeOrDelete(DiskCache.Snapshot snapshot, Task.Options ops, boolean canThrow) throws IOException {
+        Bitmap result = null;
+        InputStream is = snapshot.getInputStream();
+        if (is != null) {
+            if (ops.hasSize()) {
+                result = Utils.decodeStreamAndClose(is, ops);
+            } else {
+                result = Utils.decodeStreamAndClose(is);
+            }
+            if (result == null && !canThrow) {
+                snapshot.requireDelete();
+            }
+        }
+        if (result == null && canThrow) {
+            throw new IOException("decode failed, snapshot = " + snapshot);
         }
         return result;
     }
