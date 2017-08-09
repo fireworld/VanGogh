@@ -104,9 +104,6 @@ class Dispatcher {
                 } else if (!waitingCalls.contains(call)) {
                     waitingCalls.offer(call);
                 }
-                LogUtils.e("Dispatcher", "waiting tasks = " + waitingTasks.size()
-                        + "\n waiting calls = " + waitingCalls.size()
-                        + "\n executing calls = " + executingCalls.size());
                 promoteTask();
             }
         }

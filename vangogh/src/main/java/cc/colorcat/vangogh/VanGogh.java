@@ -3,12 +3,14 @@ package cc.colorcat.vangogh;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.DrawableRes;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -40,6 +42,11 @@ public class VanGogh {
 
     private final List<Transformation> transformations;
 
+    private final Drawable loadingDrawable;
+    private final Drawable errorDrawable;
+
+    private final boolean fade;
+
     public static void setSingleton(VanGogh vanGogh) {
         synchronized (VanGogh.class) {
             if (singleton != null) {
@@ -70,6 +77,9 @@ public class VanGogh {
         resources = builder.resources;
         debug = builder.debug;
         transformations = Utils.immutableList(builder.transformations);
+        fade = builder.fade;
+        loadingDrawable = builder.loadingDrawable;
+        errorDrawable = builder.errorDrawable;
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
@@ -138,6 +148,18 @@ public class VanGogh {
         return transformations;
     }
 
+    boolean fade() {
+        return this.fade;
+    }
+
+    Drawable defaultLoading() {
+        return loadingDrawable;
+    }
+
+    Drawable defaultError() {
+        return errorDrawable;
+    }
+
     Bitmap quickMemoryCacheCheck(String stableKey) {
         return memoryCache.get(stableKey);
     }
@@ -161,6 +183,10 @@ public class VanGogh {
         private boolean debug = false;
 
         private List<Transformation> transformations = new ArrayList<>(4);
+        private boolean fade = true;
+
+        private Drawable loadingDrawable;
+        private Drawable errorDrawable;
 
         public Builder(Context context) {
             if (context == null) throw new NullPointerException("context == null");
@@ -258,6 +284,41 @@ public class VanGogh {
                 throw new NullPointerException("transformation == null");
             }
             this.transformations.add(transformation);
+            return this;
+        }
+
+        public Builder fade(boolean fade) {
+            this.fade = fade;
+            return this;
+        }
+
+        public Builder defaultLoading(Drawable loading) {
+            loadingDrawable = loading;
+            return this;
+        }
+
+        public Builder defaultLoading(@DrawableRes int resId) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                loadingDrawable = resources.getDrawable(resId, null);
+            } else {
+                //noinspection deprecation
+                loadingDrawable = resources.getDrawable(resId);
+            }
+            return this;
+        }
+
+        public Builder defaultError(Drawable error) {
+            errorDrawable = error;
+            return this;
+        }
+
+        public Builder defaultError(@DrawableRes int resId) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                errorDrawable = resources.getDrawable(resId, null);
+            } else {
+                //noinspection deprecation
+                errorDrawable = resources.getDrawable(resId);
+            }
             return this;
         }
 

@@ -94,6 +94,9 @@ public class MainActivity extends Activity {
 //                        .rotate(90F, 50, 50)
 //                        .addTransformation(new SquareTransformation())
 //                        .addTransformation(new OvalTransformation())
+//                        .fade(false)
+//                        .loading(R.drawable.ic_cloud_download_black_24dp)
+//                        .error(R.drawable.ic_error_black_24dp)
                         .addTransformation(new CircleTransformation(10, Color.WHITE ))
                         .into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);

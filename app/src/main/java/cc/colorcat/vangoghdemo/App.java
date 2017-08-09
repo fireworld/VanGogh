@@ -18,6 +18,9 @@ public class App extends Application {
         VanGogh vanGogh = new VanGogh.Builder(this)
                 .debug(BuildConfig.DEBUG)
                 .enableLog(true)
+                .defaultLoading(R.mipmap.ic_launcher_round)
+                .defaultError(R.mipmap.ic_launcher)
+//                .fade(false)
 //                .maxRunning(1)
                 .build();
         VanGogh.setSingleton(vanGogh);

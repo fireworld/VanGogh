@@ -31,6 +31,7 @@ public class Task {
     private Options options;
 
     private List<Transformation> transformations;
+    private boolean fade;
 
     private Task(Creator creator) {
         resources = creator.vanGogh.resources();
@@ -42,6 +43,7 @@ public class Task {
         errorDrawable = creator.errorDrawable;
         options = creator.options;
         transformations = Utils.immutableList(creator.transformations);
+        fade = creator.fade;
     }
 
     Task(String url) {
@@ -80,7 +82,7 @@ public class Task {
 
     void onPostResult(Result result, Exception cause) {
         if (result != null) {
-            target.onSuccess(new VanGoghDrawable(resources, result.bitmap()), result.from());
+            target.onSuccess(new VanGoghDrawable(resources, result.bitmap(), fade), result.from());
         } else if (cause != null) {
             target.onFailed(errorDrawable, cause);
         }
@@ -214,13 +216,17 @@ public class Task {
         private Options options;
 
         private List<Transformation> transformations = new ArrayList<>(4);
+        private boolean fade;
 
         Creator(VanGogh vanGogh, Uri uri, String stableKey) {
             this.vanGogh = vanGogh;
             this.uri = uri;
             this.stableKey = stableKey;
             this.fromPolicy = vanGogh.defaultFromPolicy();
+            this.loadingDrawable = vanGogh.defaultLoading();
+            this.errorDrawable = vanGogh.defaultError();
             this.options = vanGogh.defaultOptions();
+            this.fade = vanGogh.fade();
         }
 
         /**
@@ -299,6 +305,11 @@ public class Task {
             return this;
         }
 
+        public Creator fade(boolean fade) {
+            this.fade = fade;
+            return this;
+        }
+
         public void into(ImageView view) {
             if (view == null) throw new NullPointerException("view == null");
             this.into(new ImageViewTarget(view, stableKey));
@@ -311,7 +322,7 @@ public class Task {
             if (policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-                    LogUtils.i("quick memory success.");
+//                    LogUtils.i("quick memory success.");
                     List<Transformation> trans = new LinkedList<>(vanGogh.transformations());
                     trans.addAll(transformations);
                     bitmap = Utils.transformResult(bitmap, options, trans);
