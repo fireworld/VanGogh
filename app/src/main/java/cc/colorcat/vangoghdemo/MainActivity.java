@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -17,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ import cc.colorcat.vangogh.CircleTransformation;
 import cc.colorcat.vangogh.From;
 import cc.colorcat.vangogh.OvalTransformation;
 import cc.colorcat.vangogh.SquareTransformation;
+import cc.colorcat.vangogh.Task;
 import cc.colorcat.vangogh.VanGogh;
 
 
@@ -58,6 +61,8 @@ public class MainActivity extends Activity {
         }
     };
 
+    private File mFile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +73,8 @@ public class MainActivity extends Activity {
         initView();
 //        initDaVinci();
         initData();
+        File dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        mFile = new File(dcim, "twst.jpg");
     }
 
 //    private void initDaVinci() {
@@ -88,6 +95,8 @@ public class MainActivity extends Activity {
 //                VanGogh.with(imageView.getContext()).load(courseBean.getPicSmallUrl()).loading(R.mipmap.ic_launcher_round).from(From.NETWORK).into(imageView);
                 int policy = From.NETWORK.policy | From.DISK.policy | From.MEMORY.policy;
                 VanGogh.with(imageView.getContext())
+//                        .load(R.mipmap.ic_launcher);
+//                        .load(mFile).resize(400, 400);
                         .load(courseBean.getPicBigUrl())
 //                        .resize(200, 200)
 //                        .rotate(-45F)
@@ -97,8 +106,12 @@ public class MainActivity extends Activity {
 //                        .fade(false)
 //                        .loading(R.drawable.ic_cloud_download_black_24dp)
 //                        .error(R.drawable.ic_error_black_24dp)
-                        .addTransformation(new CircleTransformation(10, Color.WHITE ))
+                        .addTransformation(new CircleTransformation(10, Color.WHITE))
                         .into(imageView);
+//                if (holder.getPosition() != 3) {
+//                    creator.addTransformation(new CircleTransformation(10, Color.WHITE));
+//                }
+//                creator.into(imageView);
 //                DaVinci.getInstance().display(courseBean.getPicSmallUrl(), imageView);
                 LogUtils.e("MainActivity", holder.getPosition() + " : " + courseBean.getPicBigUrl());
 //                Picasso.with(MainActivity.this).load(courseBean.getPicBigUrl()).into(imageView);

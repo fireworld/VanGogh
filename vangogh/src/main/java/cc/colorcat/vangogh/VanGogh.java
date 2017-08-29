@@ -85,9 +85,18 @@ public class VanGogh {
         this.dispatcher = new Dispatcher(this, builder.executor);
     }
 
-    public Task.Creator load(String url) {
-        if (url == null || url.length() == 0) throw new NullPointerException("url is empty");
-        return this.load(Uri.parse(url));
+    public Task.Creator load(String uri) {
+        if (uri == null || uri.length() == 0) throw new NullPointerException("url is empty");
+        return this.load(Uri.parse(uri));
+    }
+
+    public Task.Creator load(@DrawableRes int resId) {
+        Uri uri = Uri.parse(Utils.SCHEME_VANGOGH + "://" + Utils.HOST_RESOURCE + "?id=" + resId);
+        return this.load(uri);
+    }
+
+    public Task.Creator load(File file) {
+        return this.load(Uri.fromFile(file));
     }
 
     public Task.Creator load(Uri uri) {

@@ -31,6 +31,8 @@ import java.util.List;
  */
 
 class Utils {
+    static final String SCHEME_VANGOGH = "vangogh";
+    static final String HOST_RESOURCE = "resource";
 
     static <T> List<T> immutableList(List<T> list) {
         return Collections.unmodifiableList(new ArrayList<>(list));

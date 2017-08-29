@@ -28,6 +28,10 @@ public final class Result {
         this.from = from;
     }
 
+    public Result(InputStream is, From from) {
+        this(is, -1L, from);
+    }
+
     public Result(InputStream is, long contentLength, From from) {
         if (is == null) {
             throw new NullPointerException("is == null");
