@@ -49,7 +49,9 @@ class Utils {
         int height = src.getHeight();
         int size = Math.min(width / 4, height / 4);
         if (size < 2) return src;
-        Bitmap result = Bitmap.createBitmap(width, height, src.getConfig());
+        Bitmap.Config config = src.getConfig();
+        if (config == null) config = Bitmap.Config.ARGB_8888;
+        Bitmap result = Bitmap.createBitmap(width, height, config);
         Canvas canvas = new Canvas(result);
         canvas.drawBitmap(src, 0F, 0F, null);
         Paint paint = new Paint();
