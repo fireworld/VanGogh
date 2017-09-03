@@ -17,7 +17,8 @@ class NetworkInterceptor implements Interceptor {
     public Result intercept(Chain chain) throws IOException {
         Task task = chain.task();
         int fromPolicy = task.fromPolicy() & From.NETWORK.policy;
-        if (fromPolicy != 0 && task.uri().getScheme().startsWith("http")) {
+        String scheme = task.uri().getScheme();
+        if (fromPolicy != 0 && ("http".equals(scheme) || "https".equals(scheme))) {
             Downloader downloader = chain.loader();
             Result result = downloader.load(vanGogh, task);
             if (result != null) {
