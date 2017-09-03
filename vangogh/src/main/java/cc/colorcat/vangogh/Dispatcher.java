@@ -22,6 +22,7 @@ class Dispatcher {
     private Queue<Task> waitingTasks = new ConcurrentLinkedQueue<>();
     private Queue<RealCall> waitingCalls = new ConcurrentLinkedQueue<>();
     private Set<RealCall> executingCalls = new CopyOnWriteArraySet<>();
+    private boolean pause = false;
 
     private VanGogh vanGogh;
 
@@ -43,9 +44,18 @@ class Dispatcher {
         return false;
     }
 
+    void pause() {
+        pause = true;
+    }
+
+    void resume() {
+        pause = false;
+        promoteTask();
+    }
+
     private void promoteTask() {
         RealCall call;
-        while (executingCalls.size() < vanGogh.maxRunning() && (call = waitingCalls.poll()) != null) {
+        while (!pause && executingCalls.size() < vanGogh.maxRunning() && (call = waitingCalls.poll()) != null) {
             if (executingCalls.add(call)) {
                 executor.submit(new AsyncCall(call));
             }
