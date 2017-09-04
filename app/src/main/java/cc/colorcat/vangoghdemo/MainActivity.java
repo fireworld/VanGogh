@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -25,9 +26,6 @@ import java.util.List;
 
 import cc.colorcat.vangogh.CircleTransformation;
 import cc.colorcat.vangogh.From;
-import cc.colorcat.vangogh.OvalTransformation;
-import cc.colorcat.vangogh.SquareTransformation;
-import cc.colorcat.vangogh.Task;
 import cc.colorcat.vangogh.VanGogh;
 
 
@@ -83,6 +81,12 @@ public class MainActivity extends Activity {
 //    }
 
 
+    @Override
+    protected void onDestroy() {
+        VanGogh.with(getApplicationContext()).clear();
+        super.onDestroy();
+    }
+
     private void initView() {
         ListView listView = (ListView) findViewById(R.id.lv_main);
         mAdapter = new CommonBaseAdapter<CourseBean>(this, mList, R.layout.adapter_layout) {
@@ -118,6 +122,22 @@ public class MainActivity extends Activity {
             }
         };
         listView.setAdapter(mAdapter);
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                LogUtils.d("MainActivity", "scrollState = " + scrollState);
+//                if (scrollState == SCROLL_STATE_IDLE) {
+//                    VanGogh.with(getApplicationContext()).resume();
+//                } else {
+//                    VanGogh.with(getApplicationContext()).pause();
+//                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+            }
+        });
     }
 
     private void initData() {

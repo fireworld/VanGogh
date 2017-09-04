@@ -1,13 +1,11 @@
 package cc.colorcat.vangoghdemo;
 
-import android.content.Context;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Field;
 
 /**
  * Created by cxx on 16-3-8.
@@ -22,19 +20,8 @@ public class LogUtils {
     public static final int NOTHING = 6;
     private static int level = NOTHING;
 
-    public static void init(@NonNull Context ctx) {
-        LogUtils.level = isDebug(ctx) ? VERBOSE : NOTHING;
-    }
-
-    private static boolean isDebug(@NonNull Context ctx) {
-        try {
-            Class c = Class.forName(ctx.getPackageName() + ".BuildConfig");
-            Field debug = c.getField("DEBUG");
-            debug.setAccessible(true);
-            return debug.getBoolean(null);
-        } catch (Exception e) {
-            return false;
-        }
+    public static void init(boolean debug) {
+        LogUtils.level = debug ? VERBOSE : NOTHING;
     }
 
     public static void v(String tag, String msg) {

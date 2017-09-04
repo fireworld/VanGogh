@@ -15,7 +15,6 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-        LogUtils.init(this);
     }
 
     public void toMain(View view) {

@@ -67,6 +67,18 @@ public class VanGogh {
         return singleton;
     }
 
+    public void pause() {
+        dispatcher.pause();
+    }
+
+    public void resume() {
+        dispatcher.resume();
+    }
+
+    public void clear() {
+        dispatcher.clear();
+    }
+
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
