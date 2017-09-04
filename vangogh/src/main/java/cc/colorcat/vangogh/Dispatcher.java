@@ -22,7 +22,7 @@ class Dispatcher {
     private Queue<Task> waitingTasks = new ConcurrentLinkedQueue<>();
     private Queue<RealCall> waitingCalls = new ConcurrentLinkedQueue<>();
     private Set<RealCall> executingCalls = new CopyOnWriteArraySet<>();
-    private boolean pause = false;
+    private volatile boolean pause = false;
 
     private VanGogh vanGogh;
 
