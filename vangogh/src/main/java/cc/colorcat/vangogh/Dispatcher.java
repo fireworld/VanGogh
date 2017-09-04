@@ -34,24 +34,6 @@ class Dispatcher {
         this.executor = executor;
     }
 
-    boolean enqueue(Task task) {
-        Utils.checkMain();
-        if (!waitingTasks.contains(task) && waitingTasks.offer(task)) {
-            task.onPreExecute();
-            RealCall call = new RealCall(vanGogh, task);
-//            if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
-//                promoteTask();
-//            }
-            synchronized (waitingCalls) {
-                if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
-                    promoteTask();
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
     void pause() {
         pause = true;
     }
@@ -79,6 +61,24 @@ class Dispatcher {
 //                }
 //            }
         }
+    }
+
+    boolean enqueue(Task task) {
+        Utils.checkMain();
+        if (!waitingTasks.contains(task) && waitingTasks.offer(task)) {
+            task.onPreExecute();
+            RealCall call = new RealCall(vanGogh, task);
+//            if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
+//                promoteTask();
+//            }
+            synchronized (waitingCalls) {
+                if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
+                    promoteTask();
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     private void promoteTask() {
