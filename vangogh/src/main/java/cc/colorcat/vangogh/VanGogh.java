@@ -79,6 +79,10 @@ public class VanGogh {
         dispatcher.clear();
     }
 
+    public void releaseMemory() {
+        memoryCache.clear();
+    }
+
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
