@@ -28,6 +28,8 @@ public class VanGogh {
     private final Dispatcher dispatcher;
     private final int maxRunning;
     private final int retryCount;
+    private final int connectTimeOut;
+    private final int readTimeOut;
 
     private final List<Interceptor> interceptors;
     private final Downloader downloader;
@@ -67,25 +69,11 @@ public class VanGogh {
         return singleton;
     }
 
-    public void pause() {
-        dispatcher.pause();
-    }
-
-    public void resume() {
-        dispatcher.resume();
-    }
-
-    public void clear() {
-        dispatcher.clear();
-    }
-
-    public void releaseMemory() {
-        memoryCache.clear();
-    }
-
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
+        connectTimeOut = builder.connectTimeOut;
+        readTimeOut = builder.readTimeOut;
         interceptors = Utils.immutableList(builder.interceptors);
         downloader = builder.downloader;
         defaultFromPolicy = builder.defaultFromPolicy;
@@ -121,6 +109,22 @@ public class VanGogh {
         return new Task.Creator(this, uri, stableKey);
     }
 
+    public void pause() {
+        dispatcher.pause();
+    }
+
+    public void resume() {
+        dispatcher.resume();
+    }
+
+    public void clear() {
+        dispatcher.clear();
+    }
+
+    public void releaseMemory() {
+        memoryCache.clear();
+    }
+
     public void close() {
         singleton = null;
     }
@@ -139,6 +143,14 @@ public class VanGogh {
 
     int retryCount() {
         return retryCount;
+    }
+
+    int connectTimeOut() {
+        return connectTimeOut;
+    }
+
+    int readTimeOut() {
+        return readTimeOut;
     }
 
     List<Interceptor> interceptors() {
@@ -194,6 +206,8 @@ public class VanGogh {
         private ExecutorService executor;
         private int maxRunning = 6;
         private int retryCount = 1;
+        private int connectTimeOut = 5000;
+        private int readTimeOut = 5000;
 
         private List<Interceptor> interceptors = new ArrayList<>(4);
         private Downloader downloader;
@@ -244,6 +258,22 @@ public class VanGogh {
                 throw new IllegalArgumentException("retryCount must be positive");
             }
             this.retryCount = retryCount;
+            return this;
+        }
+
+        public Builder connectTimeOut(int timeOut) {
+            if (timeOut < 0) {
+                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+            }
+            this.connectTimeOut = timeOut;
+            return this;
+        }
+
+        public Builder readTimeOut(int timeOut) {
+            if (timeOut < 0) {
+                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+            }
+            this.readTimeOut = timeOut;
             return this;
         }
 

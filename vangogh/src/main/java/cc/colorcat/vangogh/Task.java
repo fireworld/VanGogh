@@ -24,6 +24,9 @@ public class Task {
     private String stableKey;
     private int fromPolicy;
 
+    private int connectTimeOut;
+    private int readTimeOut;
+
     private Target target;
     private Drawable loadingDrawable;
     private Drawable errorDrawable;
@@ -38,6 +41,8 @@ public class Task {
         uri = creator.uri;
         stableKey = creator.stableKey;
         fromPolicy = creator.fromPolicy;
+        connectTimeOut = creator.connectTimeOut;
+        readTimeOut = creator.readTimeOut;
         target = creator.target;
         loadingDrawable = creator.loadingDrawable;
         errorDrawable = creator.errorDrawable;
@@ -68,6 +73,14 @@ public class Task {
         return fromPolicy;
     }
 
+    public int connectTimeOut() {
+        return connectTimeOut;
+    }
+
+    public int readTimeOut() {
+        return readTimeOut;
+    }
+
     public Options options() {
         return options;
     }
@@ -91,16 +104,21 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" +
-                "uri=" + uri +
+                "resources=" + resources +
+                ", uri=" + uri +
                 ", stableKey='" + stableKey + '\'' +
                 ", fromPolicy=" + fromPolicy +
+                ", connectTimeOut=" + connectTimeOut +
+                ", readTimeOut=" + readTimeOut +
                 ", target=" + target +
                 ", loadingDrawable=" + loadingDrawable +
                 ", errorDrawable=" + errorDrawable +
                 ", options=" + options +
                 ", transformations=" + transformations +
+                ", fade=" + fade +
                 '}';
     }
+
 
     public static class Options implements Cloneable {
         private Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -209,6 +227,9 @@ public class Task {
         private String stableKey;
         private int fromPolicy;
 
+        private int connectTimeOut;
+        private int readTimeOut;
+
         private Target target = EmptyTarget.EMPTY;
         private Drawable loadingDrawable;
         private Drawable errorDrawable;
@@ -223,6 +244,8 @@ public class Task {
             this.uri = uri;
             this.stableKey = stableKey;
             this.fromPolicy = vanGogh.defaultFromPolicy();
+            this.connectTimeOut = vanGogh.connectTimeOut();
+            this.readTimeOut = vanGogh.readTimeOut();
             this.loadingDrawable = vanGogh.defaultLoading();
             this.errorDrawable = vanGogh.defaultError();
             this.options = vanGogh.defaultOptions();
@@ -244,6 +267,22 @@ public class Task {
         public Creator from(int fromPolicy) {
             From.checkFromPolicy(fromPolicy);
             this.fromPolicy = fromPolicy;
+            return this;
+        }
+
+        public Creator connectTimeOut(int timeOut) {
+            if (timeOut < 0) {
+                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+            }
+            this.connectTimeOut = timeOut;
+            return this;
+        }
+
+        public Creator readTimeOut(int timeOut) {
+            if (timeOut < 0) {
+                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+            }
+            this.readTimeOut = timeOut;
             return this;
         }
 

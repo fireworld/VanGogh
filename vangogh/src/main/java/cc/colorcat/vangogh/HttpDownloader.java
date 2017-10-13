@@ -25,14 +25,18 @@ class HttpDownloader implements Downloader {
         if (SCHEME_HTTP.equals(scheme) || SCHEME_HTTPS.equals(scheme)) {
             conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
             conn.setRequestMethod("GET");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(task.connectTimeOut());
+            conn.setReadTimeout(task.readTimeOut());
             int code = conn.getResponseCode();
             if (code == HttpURLConnection.HTTP_OK) {
                 InputStream is = conn.getInputStream();
-                long contentLength = conn.getContentLength();
-                if (is != null && contentLength > 0) {
-                    return new Result(is, contentLength, From.NETWORK);
+                if (is != null) {
+                    long contentLength = conn.getContentLength();
+                    if (contentLength > 0) {
+                        return new Result(is, contentLength, From.NETWORK);
+                    } else {
+                        return new Result(is, From.NETWORK);
+                    }
                 }
             }
             throw new IOException("network error, code = " + code + ", msg = " + conn.getResponseMessage());
