@@ -34,7 +34,11 @@ public class CircleTransformation implements Transformation {
     public Bitmap transform(Bitmap source) {
         int width = source.getWidth(), height = source.getHeight();
         int side = Math.min(width, height);
-        Bitmap out = Bitmap.createBitmap(side, side, source.getConfig());
+        Bitmap.Config config = source.getConfig();
+        if (config == null) {
+            config = Bitmap.Config.ARGB_8888;
+        }
+        Bitmap out = Bitmap.createBitmap(side, side, config);
         Canvas canvas = new Canvas(out);
         Paint paint = new Paint();
         paint.setAntiAlias(true);

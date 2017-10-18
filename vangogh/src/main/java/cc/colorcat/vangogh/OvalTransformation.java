@@ -18,7 +18,11 @@ public class OvalTransformation implements Transformation {
     @Override
     public Bitmap transform(Bitmap source) {
         final int width = source.getWidth(), height = source.getHeight();
-        Bitmap out = Bitmap.createBitmap(width, height, source.getConfig());
+        Bitmap.Config config = source.getConfig();
+        if (config == null) {
+            config = Bitmap.Config.ARGB_8888;
+        }
+        Bitmap out = Bitmap.createBitmap(width, height, config);
         Canvas canvas = new Canvas(out);
         Paint paint = new Paint();
         paint.setAntiAlias(true);
