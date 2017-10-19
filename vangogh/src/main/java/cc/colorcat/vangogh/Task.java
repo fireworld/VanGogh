@@ -360,6 +360,11 @@ public class Task {
             return this;
         }
 
+        public Creator maxSize(int maxWidth, int maxHeight) {
+            options.maxSize(maxWidth, maxHeight);
+            return this;
+        }
+
         public Creator addTransformation(Transformation transformation) {
             if (transformation == null) throw new NullPointerException("transformation == null");
             transformations.add(transformation);
