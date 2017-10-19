@@ -130,7 +130,7 @@ public class Task {
         private float rotationPivotY;
         private boolean hasRotationPivot;
 
-        Options() {
+        public Options() {
 
         }
 
