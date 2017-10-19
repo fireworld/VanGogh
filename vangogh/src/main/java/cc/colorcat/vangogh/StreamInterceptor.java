@@ -20,7 +20,7 @@ class StreamInterceptor implements Interceptor {
         if (bitmap == null) {
             InputStream is = result.stream();
             Task.Options options = task.options();
-            if (options.hasSize()) {
+            if (options.hasMaxSize()) {
                 bitmap = Utils.decodeStreamAndClose(is, options);
             } else {
                 bitmap = Utils.decodeStreamAndClose(is);

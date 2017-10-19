@@ -296,10 +296,10 @@ class Utils {
 //    }
 
     private static int calculateInSampleSize(BitmapFactory.Options bo, Task.Options to) {
-        final int reqWidth = to.reqWidth(), reqHeight = to.reqHeight();
+        final int maxWidth = to.maxWidth(), maxHeight = to.maxHeight();
         final int width = bo.outWidth, height = bo.outHeight;
         int inSampleSize = 1;
-        while (width / inSampleSize > reqWidth && height / inSampleSize > reqHeight) {
+        while (width / inSampleSize > maxWidth && height / inSampleSize > maxHeight) {
             inSampleSize *= 2;
         }
         return inSampleSize;

@@ -129,6 +129,8 @@ public class Task {
         private float rotationPivotX;
         private float rotationPivotY;
         private boolean hasRotationPivot;
+        private int maxWidth = 0;
+        private int maxHeight = 0;
 
         public Options() {
 
@@ -161,6 +163,26 @@ public class Task {
 
         public int reqHeight() {
             return reqHeight;
+        }
+
+        public boolean hasMaxSize() {
+            return maxWidth != 0 && maxHeight != 0;
+        }
+
+        public void maxSize(int maxWidth, int maxHeight) {
+            if (maxWidth < 1 || maxHeight < 1) {
+                throw new IllegalArgumentException("maxWidth < 1 || maxHeight < 1");
+            }
+            this.maxWidth = maxWidth;
+            this.maxHeight = maxHeight;
+        }
+
+        public int maxWidth() {
+            return this.maxWidth;
+        }
+
+        public int maxHeight() {
+            return this.maxHeight;
         }
 
         public void rotate(float degrees, float pivotX, float pivotY) {
