@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
         protected List<CourseBean> doInBackground(String... params) {
             List<CourseBean> list = null;
             try {
-                String jsonString = IOUtils.readStream(HOST, "utf-8");
+                String jsonString = Utils.readStream(HOST, "utf-8");
                 list = getCourseBeanFromJSON(jsonString);
                 saveStringToSP("json", jsonString);
             } catch (IOException e) {

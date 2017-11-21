@@ -15,9 +15,12 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-    }
 
-    public void toMain(View view) {
-        startActivity(new Intent(this, MainActivity.class));
+        findViewById(R.id.btn_to_main).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LaunchActivity.this, MainActivity.class));
+            }
+        });
     }
 }

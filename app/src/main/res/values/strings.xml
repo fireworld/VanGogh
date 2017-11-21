@@ -3,4 +3,5 @@
     <string name="thumbnail">thumbnail</string>
     <string name="title">title</string>
     <string name="content">content</string>
+    <string name="to_main">To Main</string>
 </resources>
