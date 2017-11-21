@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Common base adapter
  * Created by cxx on 15/10/21.
- * email: xx.ch@outlook.com
+ * xx.ch@outlook.com
  */
 public abstract class CommonBaseAdapter<T> extends BaseAdapter {
     private Context mContext;

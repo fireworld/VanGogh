@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Course info.
  * Created by cxx on 15/12/1.
- * email: xx.ch@outlook.com
+ * xx.ch@outlook.com
  */
 public class CourseBean {
     private String name;

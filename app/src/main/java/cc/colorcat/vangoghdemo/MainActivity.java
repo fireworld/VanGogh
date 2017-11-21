@@ -28,7 +28,10 @@ import cc.colorcat.vangogh.CircleTransformation;
 import cc.colorcat.vangogh.From;
 import cc.colorcat.vangogh.VanGogh;
 
-
+/**
+ * Created by cxx on 2017/7/13.
+ * xx.ch@outlook.com
+ */
 public class MainActivity extends Activity {
     private static final String HOST = "http://www.imooc.com/api/teacher?type=4&num=30";
 

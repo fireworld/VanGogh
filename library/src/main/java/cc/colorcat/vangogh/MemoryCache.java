@@ -10,7 +10,6 @@ import java.util.Map;
  * Created by cxx on 2017/7/6.
  * xx.ch@outlook.com
  */
-
 class MemoryCache implements Cache<Bitmap> {
     private final LinkedHashMap<String, Bitmap> map;
     private final int maxSize;

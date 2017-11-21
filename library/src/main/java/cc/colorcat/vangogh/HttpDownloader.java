@@ -11,7 +11,6 @@ import java.net.URL;
  * Created by cxx on 2017/7/11.
  * xx.ch@outlook.com
  */
-
 class HttpDownloader implements Downloader {
     private HttpURLConnection conn;
 

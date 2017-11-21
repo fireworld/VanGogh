@@ -7,7 +7,6 @@ import android.support.annotation.ColorInt;
  * Created by cxx on 2017/7/10.
  * xx.ch@outlook.com
  */
-
 public enum From {
     MEMORY(Color.GREEN, From.POLICY_MEMORY),
     DISK(Color.BLUE, From.POLICY_DISK),

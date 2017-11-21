@@ -8,7 +8,6 @@ import java.io.InputStream;
  * Created by cxx on 2017/7/10.
  * xx.ch@outlook.com
  */
-
 public final class Result {
     private final Bitmap bitmap;
     private final InputStream stream;

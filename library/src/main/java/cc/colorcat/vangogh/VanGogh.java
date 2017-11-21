@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
  * Created by cxx on 2017/7/6.
  * xx.ch@outlook.com
  */
-
 public class VanGogh {
     private static volatile VanGogh singleton;
 

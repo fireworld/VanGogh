@@ -11,7 +11,6 @@ import java.util.List;
  * Created by cxx on 2017/8/8.
  * xx.ch@outlook.com
  */
-
 class TransformInterceptor implements Interceptor {
     private List<Transformation> transformations;
 

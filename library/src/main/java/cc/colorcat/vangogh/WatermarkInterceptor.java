@@ -8,7 +8,6 @@ import java.io.IOException;
  * Created by cxx on 2017/7/12.
  * xx.ch@outlook.com
  */
-
 class WatermarkInterceptor implements Interceptor {
 
     @Override

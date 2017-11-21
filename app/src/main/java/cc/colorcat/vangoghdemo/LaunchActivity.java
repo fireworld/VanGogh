@@ -7,7 +7,7 @@ import android.view.View;
 
 /**
  * Created by cxx on 15/12/13.
- * email: xx.ch@outlook.com
+ * xx.ch@outlook.com
  */
 public class LaunchActivity extends AppCompatActivity {
 

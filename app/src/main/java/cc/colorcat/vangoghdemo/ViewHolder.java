@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 /**
  * Created by cxx on 15/10/20.
- * email: xx.ch@outlook.com
+ * xx.ch@outlook.com
  */
 public class ViewHolder {
     private SparseArray<View> mViews = new SparseArray<>();

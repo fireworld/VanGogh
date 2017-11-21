@@ -9,7 +9,6 @@ import java.io.InputStream;
  * Created by cxx on 2017/7/12.
  * xx.ch@outlook.com
  */
-
 class StreamInterceptor implements Interceptor {
 
     @Override

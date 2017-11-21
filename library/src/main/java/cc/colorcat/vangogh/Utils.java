@@ -29,7 +29,6 @@ import java.util.List;
  * Created by cxx on 2017/7/6.
  * xx.ch@outlook.com
  */
-
 class Utils {
     static final String SCHEME_VANGOGH = "vangogh";
     static final String HOST_RESOURCE = "resource";

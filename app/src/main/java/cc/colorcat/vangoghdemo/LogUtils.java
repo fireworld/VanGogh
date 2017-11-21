@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by cxx on 16-3-8.
- * email: xx.ch@outlook.com
+ * xx.ch@outlook.com
  */
 public class LogUtils {
     public static final int VERBOSE = 1;
