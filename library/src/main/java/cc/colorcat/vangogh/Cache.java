@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
  * Created by cxx on 2017/7/6.
  * xx.ch@outlook.com
  */
-
 public interface Cache<T> {
 
     @Nullable

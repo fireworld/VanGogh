@@ -158,7 +158,7 @@ public class VanGogh {
     }
 
     Downloader downloader() {
-        return downloader;
+        return downloader.clone();
     }
 
     int defaultFromPolicy() {

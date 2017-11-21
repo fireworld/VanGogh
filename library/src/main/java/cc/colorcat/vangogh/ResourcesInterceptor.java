@@ -24,7 +24,6 @@ class ResourcesInterceptor implements Interceptor {
             Uri uri = task.uri();
             if (Utils.SCHEME_VANGOGH.equals(uri.getScheme()) && Utils.HOST_RESOURCE.equals(uri.getHost())) {
                 int resId = Integer.parseInt(uri.getQueryParameter("id"));
-//                Bitmap bitmap = BitmapFactory.decodeResource(resources, resId);
                 return new Result(resources.openRawResource(resId), From.DISK);
             }
         }

@@ -19,11 +19,8 @@ class Dispatcher {
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final ExecutorService executor;
-    //    private Queue<Task> waitingTasks = new ConcurrentLinkedQueue<>();
     private final Deque<Task> waitingTasks = new LinkedList<>();
-    //    private Queue<RealCall> waitingCalls = new ConcurrentLinkedQueue<>();
     private final Deque<RealCall> waitingCalls = new LinkedList<>();
-    //    private Set<RealCall> executingCalls = new CopyOnWriteArraySet<>();
     private final Set<RealCall> executingCalls = new HashSet<>();
 
     private final VanGogh vanGogh;
@@ -40,7 +37,6 @@ class Dispatcher {
 
     void resume() {
         pause = false;
-//        promoteTask();
         synchronized (waitingCalls) {
             promoteTask();
         }
@@ -51,15 +47,6 @@ class Dispatcher {
         synchronized (waitingCalls) {
             waitingCalls.clear();
             waitingTasks.clear();
-//            RealCall call;
-//            while ((call = waitingCalls.poll()) != null) {
-//                Iterator<Task> iterator = waitingTasks.iterator();
-//                while (iterator.hasNext()) {
-//                    if (call.task().stableKey().equals(iterator.next().stableKey())) {
-//                        iterator.remove();
-//                    }
-//                }
-//            }
         }
     }
 
@@ -68,9 +55,6 @@ class Dispatcher {
         if (!waitingTasks.contains(task) && waitingTasks.offer(task)) {
             task.onPreExecute();
             RealCall call = new RealCall(vanGogh, task);
-//            if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
-//                promoteTask();
-//            }
             synchronized (waitingCalls) {
                 if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
                     promoteTask();
@@ -101,16 +85,12 @@ class Dispatcher {
             @Override
             public void run() {
                 String stableKey = call.task().stableKey();
-//                Iterator<Task> iterator = waitingTasks.iterator();
                 Iterator<Task> iterator = waitingTasks.descendingIterator();
                 while (iterator.hasNext()) {
                     Task task = iterator.next();
                     if (stableKey.equals(task.stableKey())) {
                         task.onPostResult(result, cause);
                         iterator.remove();
-//                        LogUtils.d("Dispatcher", "waiting tasks = " + waitingTasks.size()
-//                                + "\n waiting calls = " + waitingCalls.size()
-//                                + "\n executing calls = " + executingCalls.size());
                     }
                 }
             }
@@ -137,13 +117,6 @@ class Dispatcher {
                 LogUtils.e(e);
                 cause = new UnsupportedOperationException("unsupported uri: " + call.task().uri());
             } finally {
-//                executingCalls.remove(call);
-//                if (result != null || call.getAndIncrement() >= vanGogh.retryCount()) {
-//                    completeCall(call, result, cause);
-//                } else if (!waitingCalls.contains(call)) {
-//                    waitingCalls.offer(call);
-//                }
-//                promoteTask();
                 synchronized (waitingCalls) {
                     executingCalls.remove(call);
                     if (result != null || call.getAndIncrement() >= vanGogh.retryCount()) {

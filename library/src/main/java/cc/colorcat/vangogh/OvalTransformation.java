@@ -12,14 +12,13 @@ import android.graphics.RectF;
  * Created by cxx on 2017/8/8.
  * xx.ch@outlook.com
  */
-
 public class OvalTransformation implements Transformation {
 
     @Override
     public Bitmap transform(Bitmap source) {
         final int width = source.getWidth(), height = source.getHeight();
         Bitmap.Config config = source.getConfig();
-        if (config == null) {
+        if (config == null || config == Bitmap.Config.RGB_565) {
             config = Bitmap.Config.ARGB_8888;
         }
         Bitmap out = Bitmap.createBitmap(width, height, config);

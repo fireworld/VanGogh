@@ -14,20 +14,19 @@ import android.support.annotation.ColorInt;
  * xx.ch@outlook.com
  */
 public class CircleTransformation implements Transformation {
-    private float borderWidth = 0F;
+    private final float borderWidth;
     @ColorInt
-    private int color = Color.WHITE;
-    private boolean hasBorder;
-
-    public CircleTransformation(float borderWidth, @ColorInt int borderColor) {
-        if (borderWidth <= 0) throw new IllegalArgumentException("borderWidth must be positive");
-        this.borderWidth = borderWidth;
-        this.color = borderColor;
-        this.hasBorder = true;
-    }
+    private final int color;
+    private final boolean hasBorder;
 
     public CircleTransformation() {
-        this.hasBorder = false;
+        this(0F, Color.WHITE);
+    }
+
+    public CircleTransformation(float borderWidth, @ColorInt int borderColor) {
+        this.borderWidth = borderWidth > 0F ? borderWidth : 0F;
+        this.color = borderColor;
+        this.hasBorder = this.borderWidth > 0F;
     }
 
     @Override
@@ -35,7 +34,7 @@ public class CircleTransformation implements Transformation {
         int width = source.getWidth(), height = source.getHeight();
         int side = Math.min(width, height);
         Bitmap.Config config = source.getConfig();
-        if (config == null) {
+        if (config == null || config == Bitmap.Config.RGB_565) {
             config = Bitmap.Config.ARGB_8888;
         }
         Bitmap out = Bitmap.createBitmap(side, side, config);
