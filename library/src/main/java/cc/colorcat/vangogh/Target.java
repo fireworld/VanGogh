@@ -1,6 +1,5 @@
 package cc.colorcat.vangogh;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 

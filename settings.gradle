@@ -1,1 +1,1 @@
-include ':app', ':vangogh'
+include ':app', ':library'
