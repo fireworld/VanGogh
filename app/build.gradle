@@ -13,9 +13,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField('String', 'BASE_URL', '"http://www.imooc.com"')
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            buildConfigField('String', 'BASE_URL', '"http://www.imooc.com"')
         }
     }
 }
@@ -27,6 +33,11 @@ dependencies {
     })
     compile project(':library')
     compile rootProject.ext.supportAppcompat
+    compile rootProject.ext.supportDesign
     compile rootProject.ext.constraintLayout
+    compile rootProject.ext.gson
     testCompile rootProject.ext.junit
+    implementation files('libs/netbird-3.0.0.jar')
+    implementation files('libs/netbird-android-support.jar')
+    implementation files('libs/netbird-logging-support.jar')
 }

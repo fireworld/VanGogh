@@ -6,8 +6,8 @@
     android:orientation="vertical">
 
     <Button
-        android:id="@+id/btn_to_main"
+        android:id="@+id/btn_show_courses"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/to_main" />
+        android:text="@string/show_courses" />
 </LinearLayout>

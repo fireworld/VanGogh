@@ -3,6 +3,7 @@ package cc.colorcat.vangoghdemo;
 import android.app.Application;
 
 import cc.colorcat.vangogh.VanGogh;
+import cc.colorcat.vangoghdemo.internal.ApiService;
 
 
 /**
@@ -14,15 +15,13 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LogUtils.init(BuildConfig.DEBUG);
-        VanGogh vanGogh = new VanGogh.Builder(this)
-                .debug(BuildConfig.DEBUG)
-                .enableLog(true)
-                .defaultLoading(R.mipmap.ic_launcher_round)
-                .defaultError(R.mipmap.ic_launcher)
-//                .fade(false)
-//                .maxRunning(1)
-                .build();
-        VanGogh.setSingleton(vanGogh);
+        ApiService.init(this);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        VanGogh.with(this).clear();
+        VanGogh.with(this).releaseMemory();
     }
 }
