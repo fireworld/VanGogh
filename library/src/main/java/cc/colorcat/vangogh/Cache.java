@@ -8,6 +8,9 @@ import android.support.annotation.Nullable;
  */
 public interface Cache<T> {
 
+    /**
+     * Returns the value for {@code key} if it exists in the cache or null if not cached.
+     */
     @Nullable
     T get(String key);
 
@@ -19,5 +22,8 @@ public interface Cache<T> {
 
     long size();
 
+    /**
+     * @return the maximum sum of the sizes of the entries in this cache.
+     */
     long maxSize();
 }
