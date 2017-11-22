@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 public interface Cache<T> {
 
     /**
-     * Returns the value for {@code key} if it exists in the cache or null if not cached.
+     * Returns the value for {@code key} if it cached else null.
      */
     @Nullable
     T get(String key);
