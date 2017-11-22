@@ -5,7 +5,6 @@ import android.content.Context;
 import java.io.File;
 import java.io.IOException;
 
-import cc.colorcat.netbird3.Interceptor;
 import cc.colorcat.netbird3.MRequest;
 import cc.colorcat.netbird3.NetBird;
 import cc.colorcat.netbird3.android.AndroidLogger;

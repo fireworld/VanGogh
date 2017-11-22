@@ -17,7 +17,6 @@ import cc.colorcat.netbird3.StateIOException;
  * xx.ch@outlook.com
  */
 public class ResultParser<T> implements Parser<T> {
-
     private TypeToken<Result<T>> token;
 
     public static <T> ResultParser<T> create(TypeToken<Result<T>> token) {
