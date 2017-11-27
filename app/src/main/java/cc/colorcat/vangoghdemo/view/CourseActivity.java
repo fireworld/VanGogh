@@ -20,7 +20,6 @@ import cc.colorcat.vangoghdemo.contract.ICourses;
 import cc.colorcat.vangoghdemo.entity.Course;
 import cc.colorcat.vangoghdemo.internal.VanGoghScrollListener;
 import cc.colorcat.vangoghdemo.presenter.CoursePresenter;
-import cc.colorcat.vangoghdemo.widget.CheckableRvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvHolder;
 import cc.colorcat.vangoghdemo.widget.SimpleRvAdapter;
@@ -35,7 +34,6 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
     private ICourses.Presenter mPresenter = new CoursePresenter();
     private SwipeRefreshLayout mRefreshLayout;
     private List<Course> mCourses = new ArrayList<>(30);
-    //    private RecyclerView.Adapter<RvHolder> mAdapter;
     private RvAdapter mAdapter;
 
     @Override
@@ -46,24 +44,9 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
         RecyclerView recyclerView = findViewById(R.id.rv_courses);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addOnScrollListener(VanGoghScrollListener.get());
-//        mAdapter = new SimpleRvAdapter<Course>(mCourses, R.layout.item_course) {
-//            @Override
-//            public void bindView(RvHolder holder, Course data) {
-//                RvHolder.Helper helper = holder.getHelper();
-//                ImageView icon = helper.getView(R.id.iv_icon);
-//                Transformation trans = (helper.getPosition() & 1) == 0 ?
-//                        new CircleTransformation() : new SquareTransformation();
-//                VanGogh.with(CourseActivity.this)
-//                        .load(data.getPicSmallUrl())
-//                        .addTransformation(trans)
-//                        .into(icon);
-//                helper.setText(R.id.tv_name, data.getName())
-//                        .setText(R.id.tv_description, data.getDescription());
-//            }
-//        };
         createAdapter();
         recyclerView.setAdapter(mAdapter);
-        mAdapter.attach(recyclerView);
+        mAdapter.enableTouchToSelect(recyclerView);
 
         mRefreshLayout = findViewById(R.id.srl_root);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -75,22 +58,10 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
         mPresenter.onCreate(this);
     }
 
-    private RecyclerView.Adapter<RvHolder> createAdapter() {
-        mAdapter = new RvAdapter() {
-
+    private void createAdapter() {
+        mAdapter = new SimpleRvAdapter<Course>(mCourses, R.layout.item_course) {
             @Override
-            public int getItemCount() {
-                return mCourses.size();
-            }
-
-            @Override
-            public int getLayoutResId(int viewType) {
-                return R.layout.item_course;
-            }
-
-            @Override
-            public void bindView(RvHolder holder, int position) {
-                Course data = mCourses.get(position);
+            public void bindView(RvHolder holder, Course data) {
                 RvHolder.Helper helper = holder.getHelper();
                 ImageView icon = helper.getView(R.id.iv_icon);
                 Transformation trans = (helper.getPosition() & 1) == 0 ?
@@ -124,7 +95,6 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 }
             }
         });
-        return mAdapter;
     }
 
     @Override

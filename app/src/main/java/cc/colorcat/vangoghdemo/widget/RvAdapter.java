@@ -10,7 +10,6 @@ import android.widget.AdapterView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Locale;
 
 /**
  * Created by cxx on 2017/8/13.
@@ -21,6 +20,7 @@ public abstract class RvAdapter extends RecyclerView.Adapter<RvHolder> {
     private int mChoiceMode = ChoiceMode.NONE;
     private int mSelectedPosition = AdapterView.INVALID_POSITION;
     private OnItemSelectedChangedListener mSelectedListener;
+    private RecyclerView mRecyclerView;
     private SelectHelper mSelectHelper;
 
     @Override
@@ -36,37 +36,16 @@ public abstract class RvAdapter extends RecyclerView.Adapter<RvHolder> {
         final RvHolder.Helper helper = holder.getHelper();
         helper.setViewType(holder.getItemViewType()).setPosition(position);
         if (inChoiceMode()) {
-            final View itemView = helper.getRoot();
-            if (itemView.isSelected()) {
-                if (!isSelectedByChoiceMode(position)) {
-                    itemView.setSelected(false);
-                    mSelectedListener.onItemSelectedChanged(position, false);
-                }
-            } else {
-                if (isSelectedByChoiceMode(position)) {
-                    itemView.setSelected(true);
-                    mSelectedListener.onItemSelectedChanged(position, true);
-                }
-            }
+            setSelected(helper.getRoot(), isSelectedWithChoiceMode(position));
         }
         bindView(holder, position);
     }
 
-    public void setChoiceMode(@ChoiceMode int choiceMode) {
-        if (choiceMode == ChoiceMode.NONE
-                || choiceMode == ChoiceMode.SINGLE
-                || choiceMode == ChoiceMode.MULTIPLE) {
-            mChoiceMode = choiceMode;
-            return;
+    private boolean isSelectedWithChoiceMode(int position) {
+        if (mChoiceMode == ChoiceMode.SINGLE) {
+            return mSelectedPosition == position;
         }
-        throw new IllegalArgumentException("choiceMode must be in [0, 2]");
-    }
-
-    public void attach(RecyclerView recyclerView) {
-        if (mSelectHelper == null) {
-            mSelectHelper = new SelectHelper();
-        }
-        recyclerView.addOnItemTouchListener(mSelectHelper);
+        return isSelected(position);
     }
 
     public void setOnItemSelectedListener(OnItemSelectedChangedListener listener) {
@@ -77,9 +56,33 @@ public abstract class RvAdapter extends RecyclerView.Adapter<RvHolder> {
         return mSelectedListener;
     }
 
+    public void setChoiceMode(@ChoiceMode int choiceMode) {
+        if (choiceMode == ChoiceMode.NONE
+                || choiceMode == ChoiceMode.SINGLE
+                || choiceMode == ChoiceMode.MULTIPLE) {
+            mChoiceMode = choiceMode;
+        } else {
+            throw new IllegalArgumentException("choiceMode must be in [0, 2]");
+        }
+    }
+
+    public void enableTouchToSelect(RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+        if (mSelectHelper == null) {
+            mSelectHelper = new SelectHelper();
+        }
+        mRecyclerView.addOnItemTouchListener(mSelectHelper);
+    }
+
+    protected void setSelected(View itemView, boolean selected) {
+        itemView.setSelected(selected);
+    }
+
     public void setSelection(int position) {
-        if (inChoiceMode() && checkPosition(position) &&
-                (mChoiceMode == ChoiceMode.MULTIPLE || position != mSelectedPosition)) {
+        if (inChoiceMode()
+                && checkPosition(position)
+                && (mChoiceMode == ChoiceMode.MULTIPLE || position != mSelectedPosition)
+                && !isSelectedWithChoiceMode(position)) {
             dispatchSelect(position, true);
         }
     }
@@ -87,20 +90,6 @@ public abstract class RvAdapter extends RecyclerView.Adapter<RvHolder> {
     public int getSelection() {
         return mSelectedPosition;
     }
-
-    public void setSelected(int position, boolean selected) {
-
-    }
-
-    public boolean isSelected(int position) {
-        return false;
-    }
-
-    @LayoutRes
-    public abstract int getLayoutResId(int viewType);
-
-    public abstract void bindView(RvHolder holder, int position);
-
 
     private void dispatchSelect(int position, boolean selected) {
         if (mChoiceMode == ChoiceMode.SINGLE) {
@@ -110,37 +99,43 @@ public abstract class RvAdapter extends RecyclerView.Adapter<RvHolder> {
                 if (checkPosition(last)) {
                     dispatchSelect(last, false);
                 }
-                setSelected(mSelectedPosition, true);
-                notifyItemChanged(mSelectedPosition);
+                notifySelectedChanged(mSelectedPosition, true);
             } else {
-                setSelected(position, false);
-                notifyItemChanged(position);
+                notifySelectedChanged(position, false);
             }
         } else {
-            setSelected(position, selected);
+            notifySelectedChanged(position, selected);
+        }
+    }
+
+    private void notifySelectedChanged(int position, boolean selected) {
+        setSelected(position, selected);
+        if (mRecyclerView != null) {
+            RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
+            if (holder != null) {
+                holder.itemView.setSelected(selected);
+            }
+        } else {
             notifyItemChanged(position);
         }
-    }
-
-    private boolean isSelectedByChoiceMode(int position) {
-        if (mChoiceMode == ChoiceMode.SINGLE) {
-            return mSelectedPosition == position;
-        }
-        return RvAdapter.this.isSelected(position);
-    }
-
-    private class SelectHelper extends OnRvItemClickListener {
-        @Override
-        public void onItemClick(RecyclerView.ViewHolder holder) {
-            super.onItemClick(holder);
-            if (inChoiceMode()) {
-                final int position = holder.getAdapterPosition();
-                if (mChoiceMode == ChoiceMode.MULTIPLE || mSelectedPosition != position) {
-                    dispatchSelect(position, !isSelectedByChoiceMode(position));
-                }
-            }
+        if (mSelectedListener != null) {
+            mSelectedListener.onItemSelectedChanged(position, selected);
         }
     }
+
+    public boolean isSelected(int position) {
+        return false;
+    }
+
+    public void setSelected(int position, boolean selected) {
+
+    }
+
+    @LayoutRes
+    public abstract int getLayoutResId(int viewType);
+
+    public abstract void bindView(RvHolder holder, int position);
+
 
     private boolean checkPosition(int position) {
         return position >= 0 && position < getItemCount();
@@ -149,6 +144,21 @@ public abstract class RvAdapter extends RecyclerView.Adapter<RvHolder> {
     private boolean inChoiceMode() {
         return mChoiceMode == ChoiceMode.SINGLE || mChoiceMode == ChoiceMode.MULTIPLE;
     }
+
+
+    private class SelectHelper extends OnRvItemClickListener {
+        @Override
+        public void onItemClick(RecyclerView.ViewHolder holder) {
+            super.onItemClick(holder);
+            if (inChoiceMode()) {
+                final int position = holder.getAdapterPosition();
+                if (mChoiceMode == ChoiceMode.MULTIPLE || mSelectedPosition != position) {
+                    dispatchSelect(position, !isSelectedWithChoiceMode(position));
+                }
+            }
+        }
+    }
+
 
     public interface OnItemSelectedChangedListener {
 

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="1px"
-    android:background="@drawable/item_green_selector"
+    android:background="@drawable/bg_accent_white_selector"
     android:orientation="horizontal"
     android:padding="8dp">
 
@@ -24,6 +24,7 @@
         android:layout_marginStart="8dp"
         android:ellipsize="end"
         android:lines="1"
+        android:textColor="@color/white_grey_selector"
         android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@id/iv_icon"
         app:layout_constraintTop_toTopOf="parent" />
@@ -35,6 +36,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:maxLines="3"
+        android:textColor="@color/white_grey_selector"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_icon"
