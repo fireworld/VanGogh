@@ -20,6 +20,7 @@ public class Course {
     private String description;
     @SerializedName("learner")
     private int numOfLearner;
+    private boolean checked;
 
     public int getId() {
         return id;
@@ -67,6 +68,14 @@ public class Course {
 
     public void setNumOfLearner(int numOfLearner) {
         this.numOfLearner = numOfLearner;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 
     @Override
