@@ -32,7 +32,8 @@ public class CoursesImpl extends BaseImpl<List<Course>> implements Api.Courses {
 
     @Override
     protected MRequest.Builder<List<Course>> builder() {
-        TypeToken<Result<List<Course>>> token = new TypeToken<Result<List<Course>>>() {};
+        TypeToken<Result<List<Course>>> token = new TypeToken<Result<List<Course>>>() {
+        };
         return new MRequest.Builder<>(ResultParser.create(token))
                 .path(Api.Courses.PATH)
                 .method(Method.GET)

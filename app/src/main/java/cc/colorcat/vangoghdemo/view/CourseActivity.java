@@ -20,9 +20,9 @@ import cc.colorcat.vangoghdemo.contract.ICourses;
 import cc.colorcat.vangoghdemo.entity.Course;
 import cc.colorcat.vangoghdemo.internal.VanGoghScrollListener;
 import cc.colorcat.vangoghdemo.presenter.CoursePresenter;
-import cc.colorcat.vangoghdemo.widget.RvAdapter;
+import cc.colorcat.vangoghdemo.widget.ChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvHolder;
-import cc.colorcat.vangoghdemo.widget.SimpleRvAdapter;
+import cc.colorcat.vangoghdemo.widget.SimpleChoiceRvAdapter;
 
 /**
  * Created by cxx on 17-11-22.
@@ -34,7 +34,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
     private ICourses.Presenter mPresenter = new CoursePresenter();
     private SwipeRefreshLayout mRefreshLayout;
     private List<Course> mCourses = new ArrayList<>(30);
-    private RvAdapter mAdapter;
+    private ChoiceRvAdapter mAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
         recyclerView.addOnScrollListener(VanGoghScrollListener.get());
         createAdapter();
         recyclerView.setAdapter(mAdapter);
-        mAdapter.enableTouchToSelect(recyclerView);
+        mAdapter.attachForChoice(recyclerView);
 
         mRefreshLayout = findViewById(R.id.srl_root);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -59,7 +59,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
     }
 
     private void createAdapter() {
-        mAdapter = new SimpleRvAdapter<Course>(mCourses, R.layout.item_course) {
+        mAdapter = new SimpleChoiceRvAdapter<Course>(mCourses, R.layout.item_course) {
             @Override
             public void bindView(RvHolder holder, Course data) {
                 RvHolder.Helper helper = holder.getHelper();
@@ -84,8 +84,8 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 return mCourses.get(position).isChecked();
             }
         };
-        mAdapter.setChoiceMode(RvAdapter.ChoiceMode.SINGLE);
-        mAdapter.setOnItemSelectedListener(new RvAdapter.OnItemSelectedChangedListener() {
+        mAdapter.setChoiceMode(ChoiceRvAdapter.ChoiceMode.MULTIPLE);
+        mAdapter.setOnItemSelectedListener(new ChoiceRvAdapter.OnItemSelectedChangedListener() {
             @Override
             public void onItemSelectedChanged(int position, boolean selected) {
                 if (selected) {
