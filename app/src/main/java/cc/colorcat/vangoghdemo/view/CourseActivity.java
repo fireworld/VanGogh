@@ -83,6 +83,11 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
             public boolean isSelected(int position) {
                 return mCourses.get(position).isChecked();
             }
+
+            @Override
+            public boolean isSelectable(int position) {
+                return position != 1;
+            }
         };
         mAdapter.setChoiceMode(ChoiceRvAdapter.ChoiceMode.MULTIPLE);
         mAdapter.setOnItemSelectedListener(new ChoiceRvAdapter.OnItemSelectedChangedListener() {
