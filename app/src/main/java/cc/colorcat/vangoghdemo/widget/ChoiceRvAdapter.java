@@ -27,12 +27,6 @@ public abstract class ChoiceRvAdapter extends RvAdapter {
         if (inChoiceMode() && isSelectable(position)) {
             setSelected(holder.itemView, isSelectedWithChoiceMode(position));
         }
-//        final RvHolder.Helper helper = holder.getHelper();
-//        helper.setViewType(holder.getItemViewType()).setPosition(position);
-//        if (inChoiceMode()) {
-//            setSelected(helper.getRoot(), isSelectedWithChoiceMode(position));
-//        }
-//        bindView(holder, position);
     }
 
     private boolean isSelectedWithChoiceMode(int position) {
@@ -108,7 +102,7 @@ public abstract class ChoiceRvAdapter extends RvAdapter {
         if (mRecyclerView != null) {
             RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
             if (holder != null) {
-                holder.itemView.setSelected(selected);
+                setSelected(holder.itemView, selected);
             }
         } else {
             notifyItemChanged(position);
@@ -119,7 +113,7 @@ public abstract class ChoiceRvAdapter extends RvAdapter {
     }
 
     public boolean isSelected(int position) {
-        return false;
+        return mChoiceMode == ChoiceMode.SINGLE;
     }
 
     public void setSelected(int position, boolean selected) {
