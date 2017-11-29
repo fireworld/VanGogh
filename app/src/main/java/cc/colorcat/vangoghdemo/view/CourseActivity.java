@@ -75,8 +75,8 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
             }
 
             @Override
-            public void setSelected(int position, boolean checked) {
-                mCourses.get(position).setChecked(checked);
+            protected void updateItem(int position, boolean selected) {
+                mCourses.get(position).setChecked(selected);
             }
 
             @Override
