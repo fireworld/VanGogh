@@ -89,7 +89,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 return position != 1;
             }
         };
-        mAdapter.setChoiceMode(ChoiceRvAdapter.ChoiceMode.MULTIPLE);
+        mAdapter.setChoiceMode(ChoiceRvAdapter.ChoiceMode.SINGLE);
         mAdapter.setOnItemSelectedListener(new ChoiceRvAdapter.OnItemSelectedChangedListener() {
             @Override
             public void onItemSelectedChanged(int position, boolean selected) {
