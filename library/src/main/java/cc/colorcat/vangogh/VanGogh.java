@@ -89,7 +89,7 @@ public class VanGogh {
     }
 
     public Task.Creator load(String uri) {
-        if (uri == null || uri.length() == 0) throw new NullPointerException("url is empty");
+        if (uri == null || uri.length() == 0) throw new IllegalArgumentException("uri is empty");
         return this.load(Uri.parse(uri));
     }
 
