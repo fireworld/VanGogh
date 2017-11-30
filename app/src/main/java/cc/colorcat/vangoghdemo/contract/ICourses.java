@@ -15,6 +15,10 @@ public interface ICourses {
         void refreshCourses(List<Course> courses);
 
         void stopRefresh();
+
+        void setSelected(int[] positions);
+
+        void setUnselectable(int[] positions);
     }
 
     interface Presenter extends IBase.Presenter<View> {
