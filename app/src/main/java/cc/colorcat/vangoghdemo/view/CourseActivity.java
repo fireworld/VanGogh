@@ -44,9 +44,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
         RecyclerView recyclerView = findViewById(R.id.rv_courses);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addOnScrollListener(VanGoghScrollListener.get());
-        createAdapter();
-        recyclerView.setAdapter(mAdapter);
-        mAdapter.attachForChoice(recyclerView);
+        recyclerView.setAdapter(createAdapter());
 
         mRefreshLayout = findViewById(R.id.srl_root);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -58,14 +56,16 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
         mPresenter.onCreate(this);
     }
 
-    private void createAdapter() {
+    private ChoiceRvAdapter createAdapter() {
         mAdapter = new SimpleChoiceRvAdapter<Course>(mCourses, R.layout.item_course) {
+            private final Transformation square = new SquareTransformation();
+            private final Transformation circle = new CircleTransformation();
+
             @Override
             public void bindView(RvHolder holder, Course data) {
                 RvHolder.Helper helper = holder.getHelper();
                 ImageView icon = helper.getView(R.id.iv_icon);
-                Transformation trans = (helper.getPosition() & 1) == 0 ?
-                        new CircleTransformation() : new SquareTransformation();
+                Transformation trans = (helper.getPosition() & 1) == 0 ? circle : square;
                 VanGogh.with(CourseActivity.this)
                         .load(data.getPicSmallUrl())
                         .addTransformation(trans)
@@ -100,6 +100,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 }
             }
         });
+        return mAdapter;
     }
 
     @Override
