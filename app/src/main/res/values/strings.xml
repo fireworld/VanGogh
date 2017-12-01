@@ -3,4 +3,8 @@
     <string name="thumbnail">thumbnail</string>
     <string name="show_courses">show course list</string>
     <string name="connect_error">connect error</string>
+    <string name="single_mode">Single Mode</string>
+    <string name="multiple_mode">Multiple Mode</string>
+    <string name="none">None</string>
+    <string name="select_first">Select First</string>
 </resources>
