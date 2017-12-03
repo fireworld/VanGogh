@@ -1,6 +1,7 @@
 package cc.colorcat.vangoghdemo.widget;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -10,7 +11,8 @@ import java.util.List;
  * Created by cxx on 2017/11/30.
  * xx.ch@outlook.com
  */
-public abstract class LazyChoiceRvAdapter extends ChoiceRvAdapter {
+public abstract class AutoChoiceRvAdapter extends ChoiceRvAdapter {
+    private static final String TAG = "AutoChoice";
     private List<Boolean> mRecord = new LinkedList<>();
 
     @Override
@@ -34,22 +36,27 @@ public abstract class LazyChoiceRvAdapter extends ChoiceRvAdapter {
     protected void updateItem(int position, boolean selected) {
         super.updateItem(position, selected);
         mRecord.set(position, selected);
+        Log.w(TAG, "updateItem, " + mRecord.toString());
     }
 
     private RecyclerView.AdapterDataObserver mObserver = new RecyclerView.AdapterDataObserver() {
         @Override
         public void onChanged() {
             super.onChanged();
+            Log.i(TAG, "onChanged");
             mRecord.clear();
             mRecord.addAll(create(Boolean.FALSE, getItemCount()));
+            Log.d(TAG, mRecord.toString());
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
             super.onItemRangeChanged(positionStart, itemCount);
+            Log.i(TAG, "onItemRangeChanged, start = " + positionStart + ", count = " + itemCount);
             for (int i = positionStart, end = positionStart + itemCount; i < end; i++) {
                 mRecord.set(i, Boolean.FALSE);
             }
+            Log.d(TAG, mRecord.toString());
         }
 
 //        @Override
@@ -60,21 +67,27 @@ public abstract class LazyChoiceRvAdapter extends ChoiceRvAdapter {
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
             super.onItemRangeInserted(positionStart, itemCount);
+            Log.i(TAG, "onItemRangeInserted, start = " + positionStart + ", count = " + itemCount);
             mRecord.addAll(positionStart, create(Boolean.FALSE, itemCount));
+            Log.d(TAG, mRecord.toString());
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
             super.onItemRangeRemoved(positionStart, itemCount);
+            Log.i(TAG, "onItemRangeRemoved, start = " + positionStart + ", count = " + itemCount);
             removeRange(positionStart, itemCount);
+            Log.d(TAG, mRecord.toString());
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             super.onItemRangeMoved(fromPosition, toPosition, itemCount);
+            Log.i(TAG, "from = " + fromPosition + ", to = " + toPosition + ", count = " + itemCount);
             List<Boolean> subList = mRecord.subList(fromPosition, fromPosition + itemCount);
             removeRange(fromPosition, itemCount);
             mRecord.addAll(toPosition, subList);
+            Log.d(TAG, mRecord.toString());
         }
 
         private List<Boolean> create(Boolean value, int size) {
@@ -84,7 +97,7 @@ public abstract class LazyChoiceRvAdapter extends ChoiceRvAdapter {
         }
 
         private void removeRange(int start, int count) {
-            for (int i = start, end = start + count; i < end; i++) {
+            for (int i = start + count - 1; i >= start; i--) {
                 mRecord.remove(i);
             }
         }

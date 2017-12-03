@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import cc.colorcat.vangogh.CircleTransformation;
@@ -24,9 +23,8 @@ import cc.colorcat.vangoghdemo.entity.Course;
 import cc.colorcat.vangoghdemo.internal.VanGoghScrollListener;
 import cc.colorcat.vangoghdemo.presenter.CoursePresenter;
 import cc.colorcat.vangoghdemo.widget.ChoiceRvAdapter;
-import cc.colorcat.vangoghdemo.widget.LazyChoiceRvAdapter;
+import cc.colorcat.vangoghdemo.widget.AutoChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvHolder;
-import cc.colorcat.vangoghdemo.widget.SimpleChoiceRvAdapter;
 
 /**
  * Created by cxx on 17-11-22.
@@ -95,7 +93,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
 //                return Arrays.binarySearch(mUnselectable, position) == -1;
 //            }
 //        };
-        mAdapter = new LazyChoiceRvAdapter() {
+        mAdapter = new AutoChoiceRvAdapter() {
             private final Transformation square = new SquareTransformation();
             private final Transformation circle = new CircleTransformation();
 
@@ -160,6 +158,14 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 return true;
             case R.id.select_first:
                 mAdapter.setSelection(0);
+                return true;
+            case R.id.move:
+                List<Course> moved = new ArrayList<>(mCourses.subList(1, 4));
+                mCourses.removeAll(moved);
+                mAdapter.notifyItemRangeRemoved(1, 3);
+                mCourses.addAll(2, moved);
+                mAdapter.notifyItemRangeInserted(2,3);
+//                mAdapter.notifyDataSetChanged();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
