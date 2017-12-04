@@ -165,7 +165,6 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 mAdapter.notifyItemRangeRemoved(1, 3);
                 mCourses.addAll(2, moved);
                 mAdapter.notifyItemRangeInserted(2, 3);
-//                mAdapter.notifyDataSetChanged();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
