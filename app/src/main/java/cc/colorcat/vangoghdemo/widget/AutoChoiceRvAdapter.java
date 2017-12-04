@@ -3,8 +3,8 @@ package cc.colorcat.vangoghdemo.widget;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,17 +13,23 @@ import java.util.List;
  */
 public abstract class AutoChoiceRvAdapter extends ChoiceRvAdapter {
     private static final String TAG = "AutoChoice";
-    private List<Boolean> mRecord = new LinkedList<>();
+    private List<Boolean> mRecord = new ArrayList<>();
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
+        final int size = getItemCount();
+        if (size > 0) {
+            mRecord.clear();
+            mRecord.addAll(create(Boolean.FALSE, size));
+        }
         registerAdapterDataObserver(mObserver);
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
+        mRecord.clear();
         unregisterAdapterDataObserver(mObserver);
     }
 
@@ -90,16 +96,16 @@ public abstract class AutoChoiceRvAdapter extends ChoiceRvAdapter {
             Log.d(TAG, mRecord.toString());
         }
 
-        private List<Boolean> create(Boolean value, int size) {
-            Boolean[] booleans = new Boolean[size];
-            Arrays.fill(booleans, value);
-            return Arrays.asList(booleans);
-        }
-
         private void removeRange(int start, int count) {
             for (int i = start + count - 1; i >= start; i--) {
                 mRecord.remove(i);
             }
         }
     };
+
+    private static List<Boolean> create(Boolean defaultValue, int size) {
+        Boolean[] booleans = new Boolean[size];
+        Arrays.fill(booleans, defaultValue);
+        return Arrays.asList(booleans);
+    }
 }
