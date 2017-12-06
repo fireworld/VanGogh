@@ -387,11 +387,14 @@ public class Task {
                 throw new NullPointerException("target == null");
             }
             this.target = target;
+            quickFetchOrEnqueue();
+        }
+
+        private void quickFetchOrEnqueue() {
             int policy = fromPolicy & From.MEMORY.policy;
-            if (policy != 0) {
+            if (policy != 0 && !options.hasRotation() && !options.hasSize() && transformations.isEmpty()) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-                    bitmap = Utils.transformResult(bitmap, options, transformations);
                     if (vanGogh.debug()) {
                         bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor);
                     }

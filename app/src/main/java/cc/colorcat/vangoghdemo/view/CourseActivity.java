@@ -10,6 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,10 +111,14 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 ImageView icon = helper.getView(R.id.iv_icon);
                 Transformation trans = (helper.getPosition() & 1) == 0 ? circle : square;
                 VanGogh.with(CourseActivity.this)
-                        .load(data.getPicSmallUrl())
+                        .load(data.getPicBigUrl())
                         .addTransformation(trans)
-                        .rotate(45F)
+//                        .rotate(45F)
                         .into(icon);
+//                Picasso.with(icon.getContext())
+//                        .load(data.getPicBigUrl())
+//                        .rotate(45F)
+//                        .into(icon);
                 helper.setText(R.id.tv_serial_number, String.valueOf(helper.getPosition()))
                         .setText(R.id.tv_name, data.getName())
                         .setText(R.id.tv_description, data.getDescription());
