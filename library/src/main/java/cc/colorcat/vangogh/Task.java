@@ -289,7 +289,7 @@ public class Task {
 
         public Creator connectTimeOut(int timeOut) {
             if (timeOut < 0) {
-                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+                throw new IllegalArgumentException("timeOut < 0");
             }
             this.connectTimeOut = timeOut;
             return this;
@@ -297,7 +297,7 @@ public class Task {
 
         public Creator readTimeOut(int timeOut) {
             if (timeOut < 0) {
-                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+                throw new IllegalArgumentException("timeOut < 0");
             }
             this.readTimeOut = timeOut;
             return this;
@@ -328,7 +328,9 @@ public class Task {
         }
 
         public Creator error(Drawable error) {
-            if (error == null) throw new NullPointerException("error == null");
+            if (error == null) {
+                throw new NullPointerException("error == null");
+            }
             errorDrawable = error;
             return this;
         }
@@ -374,12 +376,16 @@ public class Task {
         }
 
         public void into(ImageView view) {
-            if (view == null) throw new NullPointerException("view == null");
+            if (view == null) {
+                throw new NullPointerException("view == null");
+            }
             this.into(new ImageViewTarget(view, stableKey));
         }
 
         public void into(Target target) {
-            if (target == null) throw new NullPointerException("target == null");
+            if (target == null) {
+                throw new NullPointerException("target == null");
+            }
             this.target = target;
             int policy = fromPolicy & From.MEMORY.policy;
             if (policy != 0) {

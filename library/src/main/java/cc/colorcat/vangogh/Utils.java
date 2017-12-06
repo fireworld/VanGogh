@@ -68,7 +68,7 @@ class Utils {
         if (dir == null) {
             dir = context.getCacheDir();
         }
-        return dir;
+        return new File(dir, "VanGogh");
     }
 
     static int calculateMemoryCacheSize(Context ctx) {

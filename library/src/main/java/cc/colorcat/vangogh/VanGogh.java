@@ -108,7 +108,9 @@ public class VanGogh {
     }
 
     public Task.Creator load(Uri uri) {
-        if (uri == null) throw new NullPointerException("uri == null");
+        if (uri == null) {
+            throw new NullPointerException("uri == null");
+        }
         String stableKey = Utils.md5(uri.toString());
         return new Task.Creator(this, uri, stableKey);
     }
@@ -237,7 +239,9 @@ public class VanGogh {
         private Drawable errorDrawable;
 
         public Builder(Context context) {
-            if (context == null) throw new NullPointerException("context == null");
+            if (context == null) {
+                throw new NullPointerException("context == null");
+            }
             downloader = new HttpDownloader();
             memoryCacheSize = Utils.calculateMemoryCacheSize(context);
             cacheDirectory = Utils.getCacheDirectory(context);
@@ -273,7 +277,7 @@ public class VanGogh {
 
         public Builder connectTimeOut(int timeOut) {
             if (timeOut < 0) {
-                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+                throw new IllegalArgumentException("timeOut < 0");
             }
             this.connectTimeOut = timeOut;
             return this;
@@ -281,7 +285,7 @@ public class VanGogh {
 
         public Builder readTimeOut(int timeOut) {
             if (timeOut < 0) {
-                throw new IllegalArgumentException("timeOut(" + timeOut + ") < 0");
+                throw new IllegalArgumentException("timeOut < 0");
             }
             this.readTimeOut = timeOut;
             return this;
