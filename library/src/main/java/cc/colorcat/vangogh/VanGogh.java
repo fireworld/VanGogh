@@ -40,6 +40,7 @@ public class VanGogh {
 
     private final Task.Options defaultOptions;
     private final Resources resources;
+    private final Resources.Theme theme;
     private final boolean debug;
 
     private final List<Transformation> transformations;
@@ -79,6 +80,7 @@ public class VanGogh {
         defaultFromPolicy = builder.defaultFromPolicy;
         defaultOptions = builder.defaultOptions;
         resources = builder.resources;
+        theme = builder.theme;
         debug = builder.debug;
         transformations = Utils.immutableList(builder.transformations);
         loadingDrawable = builder.loadingDrawable;
@@ -177,6 +179,10 @@ public class VanGogh {
         return resources;
     }
 
+    Resources.Theme theme() {
+        return theme;
+    }
+
     boolean debug() {
         return debug;
     }
@@ -219,6 +225,7 @@ public class VanGogh {
 
         private Task.Options defaultOptions;
         private Resources resources;
+        private Resources.Theme theme;
         private boolean debug = false;
 
         private List<Transformation> transformations = new ArrayList<>(4);
@@ -235,6 +242,7 @@ public class VanGogh {
             diskCacheSize = (long) Math.min(50 * 1024 * 1024, cacheDirectory.getUsableSpace() * 0.1);
             defaultOptions = new Task.Options();
             resources = context.getResources();
+            theme = context.getTheme();
         }
 
         public Builder executor(ExecutorService executor) {
@@ -300,8 +308,8 @@ public class VanGogh {
         }
 
         public Builder memoryCacheSize(long sizeInByte) {
-            if (sizeInByte < 1L) {
-                throw new IllegalArgumentException("sizeInByte < 1");
+            if (sizeInByte <= 0L) {
+                throw new IllegalArgumentException("sizeInByte <= 0");
             }
             this.memoryCacheSize = sizeInByte;
             return this;
@@ -316,8 +324,8 @@ public class VanGogh {
         }
 
         public Builder diskCacheSize(long sizeInByte) {
-            if (sizeInByte < 1L) {
-                throw new IllegalArgumentException("sizeInByte < 1");
+            if (sizeInByte <= 0L) {
+                throw new IllegalArgumentException("sizeInByte <= 0");
             }
             this.diskCacheSize = sizeInByte;
             return this;
@@ -354,9 +362,8 @@ public class VanGogh {
 
         public Builder defaultLoading(@DrawableRes int resId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                loadingDrawable = resources.getDrawable(resId, null);
+                loadingDrawable = resources.getDrawable(resId, theme);
             } else {
-                //noinspection deprecation
                 loadingDrawable = resources.getDrawable(resId);
             }
             return this;
@@ -369,9 +376,8 @@ public class VanGogh {
 
         public Builder defaultError(@DrawableRes int resId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                errorDrawable = resources.getDrawable(resId, null);
+                errorDrawable = resources.getDrawable(resId, theme);
             } else {
-                //noinspection deprecation
                 errorDrawable = resources.getDrawable(resId);
             }
             return this;

@@ -25,12 +25,12 @@ class ImageViewTarget implements Target {
     }
 
     @Override
-    public void onStart(@Nullable Drawable placeHolder) {
+    public void onPrepare(@Nullable Drawable placeHolder) {
         setDrawable(placeHolder);
     }
 
     @Override
-    public void onSuccess(Drawable drawable, From from) {
+    public void onLoaded(Drawable drawable, From from) {
         setDrawable(drawable);
     }
 

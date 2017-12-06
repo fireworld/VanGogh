@@ -18,23 +18,23 @@ import java.util.List;
  * xx.ch@outlook.com
  */
 public class Task {
-    private Resources resources;
+    private final Resources resources;
 
-    private Uri uri;
-    private String stableKey;
-    private int fromPolicy;
+    private final Uri uri;
+    private final String stableKey;
+    private final int fromPolicy;
 
-    private int connectTimeOut;
-    private int readTimeOut;
+    private final int connectTimeOut;
+    private final int readTimeOut;
 
-    private Target target;
-    private Drawable loadingDrawable;
-    private Drawable errorDrawable;
+    private final Target target;
+    private final Drawable loadingDrawable;
+    private final Drawable errorDrawable;
 
-    private Options options;
+    private final Options options;
 
-    private List<Transformation> transformations;
-    private boolean fade;
+    private final List<Transformation> transformations;
+    private final boolean fade;
 
     private Task(Creator creator) {
         resources = creator.vanGogh.resources();
@@ -49,16 +49,6 @@ public class Task {
         options = creator.options;
         transformations = Utils.immutableList(creator.transformations);
         fade = creator.fade;
-    }
-
-    Task(String url) {
-        this(Uri.parse(url));
-    }
-
-    Task(Uri uri) {
-        if (uri == null) throw new NullPointerException("uri == null");
-        this.uri = uri;
-        this.stableKey = Utils.md5(uri.toString());
     }
 
     public Uri uri() {
@@ -90,12 +80,12 @@ public class Task {
     }
 
     void onPreExecute() {
-        target.onStart(loadingDrawable);
+        target.onPrepare(loadingDrawable);
     }
 
     void onPostResult(Result result, Exception cause) {
         if (result != null) {
-            target.onSuccess(new VanGoghDrawable(resources, result.bitmap(), fade), result.from());
+            target.onLoaded(new VanGoghDrawable(resources, result.bitmap(), fade), result.from());
         } else if (cause != null) {
             target.onFailed(errorDrawable, cause);
         }
@@ -146,12 +136,12 @@ public class Task {
         }
 
         public boolean hasSize() {
-            return reqWidth != 0 && reqHeight != 0;
+            return reqWidth > 0 && reqHeight > 0;
         }
 
         public void resize(int width, int height) {
-            if (width < 1 || height < 1) {
-                throw new IllegalArgumentException("width < 1 || height < 1");
+            if (width <= 0 || height <= 0) {
+                throw new IllegalArgumentException("width <= 0 || height <= 0");
             }
             this.reqWidth = width;
             this.reqHeight = height;
@@ -166,12 +156,12 @@ public class Task {
         }
 
         public boolean hasMaxSize() {
-            return maxWidth != 0 && maxHeight != 0;
+            return maxWidth > 0 && maxHeight > 0;
         }
 
         public void maxSize(int maxWidth, int maxHeight) {
-            if (maxWidth < 1 || maxHeight < 1) {
-                throw new IllegalArgumentException("maxWidth < 1 || maxHeight < 1");
+            if (maxWidth <= 0 || maxHeight <= 0) {
+                throw new IllegalArgumentException("maxWidth <= 0 || maxHeight <= 0");
             }
             this.maxWidth = maxWidth;
             this.maxHeight = maxHeight;
@@ -228,6 +218,8 @@ public class Task {
                     ", rotationPivotX=" + rotationPivotX +
                     ", rotationPivotY=" + rotationPivotY +
                     ", hasRotationPivot=" + hasRotationPivot +
+                    ", maxWidth=" + maxWidth +
+                    ", maxHeight=" + maxHeight +
                     '}';
         }
 
@@ -276,7 +268,7 @@ public class Task {
 
         /**
          * 数据来源策略配置，含内存、磁盘、网络三种基本模式，也可将三种模式组合使用
-         * 如默认的 {@link From#ANY#policy} 即是将三种模式组合使用，会按照优先内存，其次磁盘，最后网络的方式获取
+         * 如默认的 {@link From#ANY#policy} 即是将三种模式组合使用，会按照优先内存，其次磁盘，最后网络的顺序获取
          * 如需其它的组合方式，可使用如下形式：
          * 只从内存和磁盘：<code>From.MEMORY.policy | From.DISK.policy</code>
          * 只从内存和网络：<code>From.MEMORY.policy | From.NETWORK.policy</code>
@@ -310,9 +302,8 @@ public class Task {
 
         public Creator loading(@DrawableRes int loadingResId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                loadingDrawable = vanGogh.resources().getDrawable(loadingResId, null);
+                loadingDrawable = vanGogh.resources().getDrawable(loadingResId, vanGogh.theme());
             } else {
-                //noinspection deprecation
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId);
             }
             return this;
@@ -326,9 +317,8 @@ public class Task {
 
         public Creator error(@DrawableRes int errorResId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                errorDrawable = vanGogh.resources().getDrawable(errorResId, null);
+                errorDrawable = vanGogh.resources().getDrawable(errorResId, vanGogh.theme());
             } else {
-                //noinspection deprecation
                 errorDrawable = vanGogh.resources().getDrawable(errorResId);
             }
             return this;
@@ -388,14 +378,13 @@ public class Task {
             if (policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-//                    LogUtils.i("quick memory success.");
                     List<Transformation> trans = new LinkedList<>(vanGogh.transformations());
                     trans.addAll(transformations);
                     bitmap = Utils.transformResult(bitmap, options, trans);
                     if (vanGogh.debug()) {
                         bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor);
                     }
-                    target.onSuccess(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
+                    target.onLoaded(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
                     return;
                 }
             }

@@ -1,7 +1,6 @@
 package cc.colorcat.vangogh;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -9,8 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Comparator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -31,14 +28,6 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void generic() throws Exception {
-        Set<Task> set = new ConcurrentSkipListSet<>(new TaskComparator());
-        System.out.println(set.add(new Task("https://www.baidu.com")));
-        System.out.println(set.add(new Task("http://www.zhihu.com")));
-        System.out.println(set.add(new Task("https://www.baidu.com")));
-        System.out.println(set.add(new Task("http://www.baidu.com")));
-        System.out.println(set.add(new Task(Uri.parse("http://www.zhihu.com"))));
-        String s = set.toString();
-        System.out.println(s);
     }
 
     @Test

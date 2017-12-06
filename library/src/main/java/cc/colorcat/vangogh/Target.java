@@ -9,9 +9,9 @@ import android.support.annotation.Nullable;
  */
 public interface Target {
 
-    void onStart(@Nullable Drawable placeHolder);
+    void onPrepare(@Nullable Drawable placeHolder);
 
-    void onSuccess(Drawable drawable, From from);
+    void onLoaded(Drawable drawable, From from);
 
     void onFailed(@Nullable Drawable error, Exception cause);
 }
