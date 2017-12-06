@@ -22,8 +22,8 @@ import cc.colorcat.vangoghdemo.contract.ICourses;
 import cc.colorcat.vangoghdemo.entity.Course;
 import cc.colorcat.vangoghdemo.internal.VanGoghScrollListener;
 import cc.colorcat.vangoghdemo.presenter.CoursePresenter;
-import cc.colorcat.vangoghdemo.widget.ChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.AutoChoiceRvAdapter;
+import cc.colorcat.vangoghdemo.widget.ChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvHolder;
 
 /**
@@ -111,6 +111,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 VanGogh.with(CourseActivity.this)
                         .load(data.getPicSmallUrl())
                         .addTransformation(trans)
+                        .rotate(45F)
                         .into(icon);
                 helper.setText(R.id.tv_serial_number, String.valueOf(helper.getPosition()))
                         .setText(R.id.tv_name, data.getName())

@@ -131,7 +131,9 @@ public class Task {
         }
 
         public void config(Bitmap.Config config) {
-            if (config == null) throw new NullPointerException("config == null");
+            if (config == null) {
+                throw new NullPointerException("config == null");
+            }
             this.config = config;
         }
 
@@ -168,11 +170,11 @@ public class Task {
         }
 
         public int maxWidth() {
-            return this.maxWidth;
+            return maxWidth;
         }
 
         public int maxHeight() {
-            return this.maxHeight;
+            return maxHeight;
         }
 
         public void rotate(float degrees, float pivotX, float pivotY) {

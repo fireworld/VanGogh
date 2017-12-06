@@ -329,12 +329,10 @@ class Utils {
                 matrix.postScale(scale, scale);
             }
         }
-        if (ops.hasRotation()) {
-            if (ops.hasRotationPivot()) {
-                matrix.postRotate(ops.rotationDegrees(), ops.rotationPivotX(), ops.rotationPivotY());
-            } else {
-                matrix.postRotate(ops.rotationDegrees());
-            }
+        if (ops.hasRotationPivot()) {
+            matrix.postRotate(ops.rotationDegrees(), ops.rotationPivotX(), ops.rotationPivotY());
+        } else if (ops.hasRotation()) {
+            matrix.postRotate(ops.rotationDegrees());
         }
         return Bitmap.createBitmap(result, 0, 0, width, height, matrix, true);
     }
