@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Created by cxx on 2017/7/6.
  * xx.ch@outlook.com
  */
+@SuppressWarnings("unused")
 public class VanGogh {
     private static volatile VanGogh singleton;
 
@@ -80,9 +81,9 @@ public class VanGogh {
         resources = builder.resources;
         debug = builder.debug;
         transformations = Utils.immutableList(builder.transformations);
-        fade = builder.fade;
         loadingDrawable = builder.loadingDrawable;
         errorDrawable = builder.errorDrawable;
+        fade = builder.fade;
         this.memoryCache = memoryCache;
         this.diskCache = diskCache;
         this.dispatcher = new Dispatcher(this, builder.executor);
@@ -284,7 +285,7 @@ public class VanGogh {
             return this;
         }
 
-        public Builder Downloader(Downloader downloader) {
+        public Builder downloader(Downloader downloader) {
             if (downloader == null) {
                 throw new NullPointerException("downloader == null");
             }
