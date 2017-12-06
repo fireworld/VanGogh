@@ -92,7 +92,9 @@ public class VanGogh {
     }
 
     public Task.Creator load(String uri) {
-        if (uri == null || uri.length() == 0) throw new IllegalArgumentException("uri is empty");
+        if (uri == null || uri.length() == 0) {
+            throw new IllegalArgumentException("uri is empty");
+        }
         return this.load(Uri.parse(uri));
     }
 
@@ -192,7 +194,7 @@ public class VanGogh {
     }
 
     boolean fade() {
-        return this.fade;
+        return fade;
     }
 
     Drawable defaultLoading() {
@@ -263,7 +265,7 @@ public class VanGogh {
 
         public Builder retryCount(int retryCount) {
             if (retryCount < 0) {
-                throw new IllegalArgumentException("retryCount must be positive");
+                throw new IllegalArgumentException("retryCount < 0");
             }
             this.retryCount = retryCount;
             return this;
@@ -289,7 +291,9 @@ public class VanGogh {
             if (interceptor == null) {
                 throw new NullPointerException("interceptor == null");
             }
-            interceptors.add(interceptor);
+            if (!interceptors.contains(interceptor)) {
+                interceptors.add(interceptor);
+            }
             return this;
         }
 
@@ -332,7 +336,9 @@ public class VanGogh {
         }
 
         public Builder defaultOptions(Task.Options options) {
-            if (options == null) throw new NullPointerException("options == null");
+            if (options == null) {
+                throw new NullPointerException("options == null");
+            }
             defaultOptions = options;
             return this;
         }
@@ -346,7 +352,9 @@ public class VanGogh {
             if (transformation == null) {
                 throw new NullPointerException("transformation == null");
             }
-            this.transformations.add(transformation);
+            if (!transformations.contains(transformation)) {
+                transformations.add(transformation);
+            }
             return this;
         }
 

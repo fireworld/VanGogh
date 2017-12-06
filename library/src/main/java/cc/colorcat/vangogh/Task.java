@@ -10,13 +10,13 @@ import android.support.annotation.DrawableRes;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by cxx on 2017/7/11.
  * xx.ch@outlook.com
  */
+@SuppressWarnings("unused")
 public class Task {
     private final Resources resources;
 
@@ -250,7 +250,7 @@ public class Task {
 
         private Options options;
 
-        private List<Transformation> transformations = new ArrayList<>(4);
+        private List<Transformation> transformations;
         private boolean fade;
 
         Creator(VanGogh vanGogh, Uri uri, String stableKey) {
@@ -263,6 +263,7 @@ public class Task {
             this.loadingDrawable = vanGogh.defaultLoading();
             this.errorDrawable = vanGogh.defaultError();
             this.options = vanGogh.defaultOptions();
+            this.transformations = new ArrayList<>(vanGogh.transformations());
             this.fade = vanGogh.fade();
         }
 
@@ -356,8 +357,12 @@ public class Task {
         }
 
         public Creator addTransformation(Transformation transformation) {
-            if (transformation == null) throw new NullPointerException("transformation == null");
-            transformations.add(transformation);
+            if (transformation == null) {
+                throw new NullPointerException("transformation == null");
+            }
+            if (!transformations.contains(transformation)) {
+                transformations.add(transformation);
+            }
             return this;
         }
 
@@ -378,9 +383,7 @@ public class Task {
             if (policy != 0) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
-                    List<Transformation> trans = new LinkedList<>(vanGogh.transformations());
-                    trans.addAll(transformations);
-                    bitmap = Utils.transformResult(bitmap, options, trans);
+                    bitmap = Utils.transformResult(bitmap, options, transformations);
                     if (vanGogh.debug()) {
                         bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor);
                     }

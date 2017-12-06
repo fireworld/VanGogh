@@ -44,7 +44,7 @@ class RealCall implements Call {
         if (vanGogh.debug()) {
             interceptors.add(new WatermarkInterceptor());
         }
-        interceptors.add(new TransformInterceptor(vanGogh.transformations()));
+        interceptors.add(new TransformInterceptor());
         interceptors.add(new MemoryCacheInterceptor(vanGogh.memoryCache()));
         interceptors.add(new StreamInterceptor());
         interceptors.add(new ResourcesInterceptor(vanGogh.resources()));
