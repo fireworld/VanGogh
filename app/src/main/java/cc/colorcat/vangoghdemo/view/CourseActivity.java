@@ -122,7 +122,7 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
                 return mCourses.size();
             }
         };
-        mAdapter.setOnItemSelectedListener(new ChoiceRvAdapter.OnItemSelectedChangedListener() {
+        mAdapter.setOnItemSelectedChangedListener(new ChoiceRvAdapter.OnItemSelectedChangedListener() {
             @Override
             public void onItemSelectedChanged(int position, boolean selected) {
                 if (selected) {
