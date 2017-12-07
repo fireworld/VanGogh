@@ -18,17 +18,14 @@ public abstract class AbsTarget<V extends View> implements Target {
     private final Object tag;
 
     public AbsTarget(V view, Object tag) {
+        view.setTag(TAG_ID, tag);
         this.ref = new WeakReference<>(view);
         this.tag = tag;
     }
 
     @Override
     public void onPrepare(@Nullable Drawable placeHolder) {
-        V view = ref.get();
-        if (view != null) {
-            setDrawable(view, placeHolder);
-            view.setTag(TAG_ID, tag);
-        }
+        setDrawableWithCheck(placeHolder);
     }
 
     @Override
