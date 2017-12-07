@@ -50,7 +50,7 @@ class Dispatcher {
         }
     }
 
-    boolean enqueue(Task task) {
+    void enqueue(Task task) {
         Utils.checkMain();
         if (!waitingTasks.contains(task) && waitingTasks.offer(task)) {
             task.onPreExecute();
@@ -60,9 +60,7 @@ class Dispatcher {
                     promoteTask();
                 }
             }
-            return true;
         }
-        return false;
     }
 
     private void promoteTask() {
