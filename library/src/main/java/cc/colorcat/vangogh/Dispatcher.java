@@ -19,9 +19,9 @@ class Dispatcher {
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final ExecutorService executor;
-    private final Deque<Task> waitingTasks = new LinkedList<>();
-    private final Deque<RealCall> waitingCalls = new LinkedList<>();
-    private final Set<RealCall> executingCalls = new HashSet<>();
+    private final Deque<Task> tasks = new LinkedList<>();
+    private final Deque<RealCall> waiting = new LinkedList<>();
+    private final Set<RealCall> running = new HashSet<>();
 
     private final VanGogh vanGogh;
     private volatile boolean pause = false;
@@ -37,26 +37,26 @@ class Dispatcher {
 
     void resume() {
         pause = false;
-        synchronized (waitingCalls) {
+        synchronized (waiting) {
             promoteTask();
         }
     }
 
     void clear() {
         Utils.checkMain();
-        synchronized (waitingCalls) {
-            waitingCalls.clear();
-            waitingTasks.clear();
+        synchronized (waiting) {
+            waiting.clear();
+            tasks.clear();
         }
     }
 
     void enqueue(Task task) {
         Utils.checkMain();
-        if (!waitingTasks.contains(task) && waitingTasks.offer(task)) {
+        if (!tasks.contains(task) && tasks.offer(task)) {
             task.onPreExecute();
             RealCall call = new RealCall(vanGogh, task);
-            synchronized (waitingCalls) {
-                if (!waitingCalls.contains(call) && waitingCalls.offer(call)) {
+            synchronized (waiting) {
+                if (!waiting.contains(call) && waiting.offer(call)) {
                     promoteTask();
                 }
             }
@@ -65,14 +65,14 @@ class Dispatcher {
 
     private void promoteTask() {
         RealCall call;
-        while (!pause && executingCalls.size() < vanGogh.maxRunning() && (call = waitingCalls.pollLast()) != null) {
-            if (executingCalls.add(call)) {
+        while (!pause && running.size() < vanGogh.maxRunning() && (call = waiting.pollLast()) != null) {
+            if (running.add(call)) {
                 executor.submit(new AsyncCall(call));
             }
         }
-//        LogUtils.i("Dispatcher", "waiting tasks = " + waitingTasks.size()
-//                + "\n waiting calls = " + waitingCalls.size()
-//                + "\n executing calls = " + executingCalls.size());
+//        LogUtils.i("Dispatcher", "waiting tasks = " + tasks.size()
+//                + "\n waiting calls = " + waiting.size()
+//                + "\n running calls = " + running.size());
     }
 
     private void completeCall(final RealCall call, final Result result, final Exception cause) {
@@ -83,7 +83,7 @@ class Dispatcher {
             @Override
             public void run() {
                 String stableKey = call.task().stableKey();
-                Iterator<Task> iterator = waitingTasks.descendingIterator();
+                Iterator<Task> iterator = tasks.descendingIterator();
                 while (iterator.hasNext()) {
                     Task task = iterator.next();
                     if (stableKey.equals(task.stableKey())) {
@@ -115,12 +115,12 @@ class Dispatcher {
                 LogUtils.e(e);
                 cause = new UnsupportedOperationException("unsupported uri: " + call.task().uri());
             } finally {
-                synchronized (waitingCalls) {
-                    executingCalls.remove(call);
+                synchronized (waiting) {
+                    running.remove(call);
                     if (result != null || call.getAndIncrement() >= vanGogh.retryCount()) {
                         completeCall(call, result, cause);
-                    } else if (!waitingCalls.contains(call)) {
-                        waitingCalls.offer(call);
+                    } else if (!waiting.contains(call)) {
+                        waiting.offer(call);
                     }
                     promoteTask();
                 }

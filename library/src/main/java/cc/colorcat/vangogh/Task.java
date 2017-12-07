@@ -254,6 +254,7 @@ public class Task {
 
         private List<Transformation> transformations;
         private boolean fade;
+        private Callback callback;
 
         Creator(VanGogh vanGogh, Uri uri, String stableKey) {
             this.vanGogh = vanGogh;
@@ -375,6 +376,11 @@ public class Task {
             return this;
         }
 
+        public Creator callback(Callback callback) {
+            this.callback = callback;
+            return this;
+        }
+
         public void into(ImageView view) {
             if (view == null) {
                 throw new NullPointerException("view == null");
@@ -390,7 +396,19 @@ public class Task {
             quickFetchOrEnqueue();
         }
 
+        public void fetch() {
+            quickFetchOrEnqueue();
+        }
+
+        public void fetch(Callback callback) {
+            this.callback = callback;
+            quickFetchOrEnqueue();
+        }
+
         private void quickFetchOrEnqueue() {
+            if (callback != null) {
+                target = new TargetProxy(target, callback);
+            }
             int policy = fromPolicy & From.MEMORY.policy;
             if (policy != 0 && !options.hasRotation() && !options.hasSize() && transformations.isEmpty()) {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
