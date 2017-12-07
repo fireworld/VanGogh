@@ -9,6 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Looper;
 import android.support.annotation.ColorInt;
+import android.widget.ListView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -32,6 +34,20 @@ import java.util.List;
 class Utils {
     static final String SCHEME_VANGOGH = "vangogh";
     static final String HOST_RESOURCE = "resource";
+
+    static ListView.OnScrollListener getOnScrollListener(ListView listView) {
+        Field[] fields = ListView.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getClass().isAssignableFrom(ListView.OnScrollListener.class)) {
+                try {
+                    return (ListView.OnScrollListener) field.get(listView);
+                } catch (IllegalAccessException e) {
+                    LogUtils.e(e);
+                }
+            }
+        }
+        return null;
+    }
 
     static <T> List<T> immutableList(List<T> list) {
         return Collections.unmodifiableList(new ArrayList<>(list));
