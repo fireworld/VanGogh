@@ -7,7 +7,7 @@ import android.widget.ImageView;
  * Created by cxx on 2017/7/10.
  * xx.ch@outlook.com
  */
-class ImageViewTarget extends AbsTarget<ImageView> {
+class ImageViewTarget extends ViewTarget<ImageView> {
 
     ImageViewTarget(ImageView view, Object tag) {
         super(view, tag);

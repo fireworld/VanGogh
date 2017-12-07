@@ -11,13 +11,13 @@ import java.lang.ref.WeakReference;
  * Created by cxx on 17-12-7.
  * xx.ch@outlook.com
  */
-public abstract class AbsTarget<V extends View> implements Target {
+public abstract class ViewTarget<V extends View> implements Target {
     private static final int TAG_ID = R.string.app_name;
 
     private final Reference<? extends V> ref;
     private final Object tag;
 
-    public AbsTarget(V view, Object tag) {
+    public ViewTarget(V view, Object tag) {
         view.setTag(TAG_ID, tag);
         this.ref = new WeakReference<>(view);
         this.tag = tag;
