@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 class ImageViewTarget implements Target {
     private static final int TAG_ID = R.string.app_name;
 
-    private final Reference<ImageView> ref;
+    private final Reference<? extends ImageView> ref;
     private final String tag;
 
     ImageViewTarget(ImageView view, String tag) {
