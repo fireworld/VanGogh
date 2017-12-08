@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
+import android.widget.ListView;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,6 +114,14 @@ public class VanGogh {
         }
         String stableKey = Utils.md5(uri.toString());
         return new Task.Creator(this, uri, stableKey);
+    }
+
+    public void attachToListView(ListView view) {
+        attachToListView(view, null);
+    }
+
+    public void attachToListView(ListView view, ListView.OnScrollListener listener) {
+        view.setOnScrollListener(new ListViewScrollListener(this, listener));
     }
 
     public void pause() {

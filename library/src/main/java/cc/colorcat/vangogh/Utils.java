@@ -43,13 +43,13 @@ class Utils {
         }
     }
 
-    static Bitmap makeWatermark(Bitmap src, @ColorInt int color) {
+    static Bitmap makeWatermark(Bitmap src, @ColorInt int color, Task.Options to) {
         int width = src.getWidth();
         int height = src.getHeight();
         int size = Math.min(width / 4, height / 4);
         if (size < 2) return src;
         Bitmap.Config config = src.getConfig();
-        if (config == null) config = Bitmap.Config.ARGB_8888;
+        if (config == null) config = to.config();
         Bitmap result = Bitmap.createBitmap(width, height, config);
         Canvas canvas = new Canvas(result);
         canvas.drawBitmap(src, 0F, 0F, null);
@@ -222,41 +222,6 @@ class Utils {
         }
     }
 
-    static Bitmap decodeStreamAndClose(InputStream is, int reqWidth, int reqHeight, Bitmap.Config config) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(is);
-        try {
-            bis.mark(bis.available());
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            if (config != null) options.inPreferredConfig = config;
-            BitmapFactory.decodeStream(bis, null, options);
-            bis.reset();
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-            options.inJustDecodeBounds = false;
-            return BitmapFactory.decodeStream(bis, null, options);
-        } finally {
-            close(bis);
-            close(is);
-        }
-    }
-
-    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height >> 1;
-            final int halfWidth = width >> 1;
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-        return inSampleSize;
-    }
-
     static Bitmap decodeStreamAndClose(InputStream is, Task.Options to) throws IOException {
         BufferedInputStream bis = null;
         InputStream resettable = is;
@@ -280,26 +245,12 @@ class Utils {
         }
     }
 
-//    private static int calculateInSampleSize(BitmapFactory.Options bo, Task.Options to) {
-//        final int reqWidth = to.reqWidth();
-//        final int reqHeight = to.reqHeight();
-//        final int width = bo.outWidth;
-//        final int height = bo.outHeight;
-//        int sampleSize = 1;
-//        if (height > reqHeight || width > reqWidth) {
-//            final int heightRatio = (int) Math.floor((float) height / (float) reqHeight);
-//            final int widthRatio = (int) Math.floor((float) width / (float) reqWidth);
-//            sampleSize = to.centerInside() ? Math.max(heightRatio, widthRatio) : Math.min(heightRatio, widthRatio);
-//        }
-//        return sampleSize;
-//    }
-
     private static int calculateInSampleSize(BitmapFactory.Options bo, Task.Options to) {
         final int maxWidth = to.maxWidth(), maxHeight = to.maxHeight();
         final int width = bo.outWidth, height = bo.outHeight;
         int inSampleSize = 1;
         while (width / inSampleSize > maxWidth && height / inSampleSize > maxHeight) {
-            inSampleSize *= 2;
+            inSampleSize <<= 1;
         }
         return inSampleSize;
     }
@@ -309,10 +260,8 @@ class Utils {
         if (ops.hasSize() || ops.hasRotation()) {
             newResult = applyOptions(result, ops);
         }
-        if (!transformations.isEmpty()) {
-            for (Transformation transformation : transformations) {
-                newResult = transformation.transform(newResult);
-            }
+        for (Transformation transformation : transformations) {
+            newResult = transformation.transform(newResult);
         }
         return newResult;
     }

@@ -414,7 +414,7 @@ public class Task {
                 Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
                 if (bitmap != null) {
                     if (vanGogh.debug()) {
-                        bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor);
+                        bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor, options);
                     }
                     target.onLoaded(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
                     return;

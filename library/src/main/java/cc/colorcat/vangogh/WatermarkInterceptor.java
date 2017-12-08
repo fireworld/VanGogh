@@ -12,9 +12,10 @@ class WatermarkInterceptor implements Interceptor {
 
     @Override
     public Result intercept(Chain chain) throws IOException {
-        Result result = chain.proceed(chain.task());
+        Task task = chain.task();
+        Result result = chain.proceed(task);
         From resultFrom = result.from();
-        Bitmap bitmap = Utils.makeWatermark(result.bitmap(), resultFrom.debugColor);
+        Bitmap bitmap = Utils.makeWatermark(result.bitmap(), resultFrom.debugColor, task.options());
         return new Result(bitmap, resultFrom);
     }
 }

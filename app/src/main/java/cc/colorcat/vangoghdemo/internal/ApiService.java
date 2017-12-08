@@ -46,7 +46,7 @@ public final class ApiService {
                 .defaultOptions(global)
                 .defaultLoading(R.mipmap.ic_launcher_round)
                 .defaultError(R.mipmap.ic_launcher)
-//                .debug(debug)
+                .debug(debug)
                 .enableLog(debug);
         File imageCache = new File(context.getCacheDir(), "ImageCache");
         if (imageCache.exists() || imageCache.mkdirs()) {
