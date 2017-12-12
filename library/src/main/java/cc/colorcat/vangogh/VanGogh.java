@@ -51,6 +51,10 @@ public class VanGogh {
 
     private final boolean fade;
 
+    /**
+     * Set the global instance.
+     * NOTE: This method must be called before calls to {@link #with}.
+     */
     public static void setSingleton(VanGogh vanGogh) {
         synchronized (VanGogh.class) {
             if (singleton != null) {
@@ -60,6 +64,10 @@ public class VanGogh {
         }
     }
 
+    /**
+     * Get the global instance.
+     * If the global instance is null which will be initialized with default.
+     */
     public static VanGogh with(Context ctx) {
         if (singleton == null) {
             synchronized (VanGogh.class) {
@@ -138,10 +146,6 @@ public class VanGogh {
 
     public void releaseMemory() {
         memoryCache.clear();
-    }
-
-    public void close() {
-        singleton = null;
     }
 
     void enqueue(Task task) {
