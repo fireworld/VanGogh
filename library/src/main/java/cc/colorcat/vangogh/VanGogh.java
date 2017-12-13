@@ -100,6 +100,15 @@ public class VanGogh {
         this.dispatcher = new Dispatcher(this, builder.executor);
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified path.
+     *
+     * @param uri May be a remote URL, file or android resource.
+     * @throws IllegalArgumentException if {@code uri} is null or empty.
+     * @see #load(Uri)
+     * @see #load(File)
+     * @see #load(int)
+     */
     public Task.Creator load(String uri) {
         if (uri == null || uri.length() == 0) {
             throw new IllegalArgumentException("uri is empty");
@@ -107,15 +116,37 @@ public class VanGogh {
         return this.load(Uri.parse(uri));
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified drawable resource ID.
+     *
+     * @see #load(Uri)
+     * @see #load(File)
+     * @see #load(String)
+     */
     public Task.Creator load(@DrawableRes int resId) {
         Uri uri = Uri.parse(Utils.SCHEME_VANGOGH + "://" + Utils.HOST_RESOURCE + "?id=" + resId);
         return this.load(uri);
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified image file.
+     *
+     * @see #load(Uri)
+     * @see #load(File)
+     * @see #load(int)
+     */
     public Task.Creator load(File file) {
         return this.load(Uri.fromFile(file));
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified uri.
+     *
+     * @throws NullPointerException if {@code uri} is null.
+     * @see #load(String)
+     * @see #load(File)
+     * @see #load(int)
+     */
     public Task.Creator load(Uri uri) {
         if (uri == null) {
             throw new NullPointerException("uri == null");
@@ -124,10 +155,23 @@ public class VanGogh {
         return new Task.Creator(this, uri, stableKey);
     }
 
+    /**
+     * Attach to {@link ListView} so that {@link VanGogh} could pause or resume the image request
+     * by ListView's scroll state.
+     *
+     * @see #attachToListView(ListView, ListView.OnScrollListener)
+     */
     public void attachToListView(ListView view) {
         attachToListView(view, null);
     }
 
+    /**
+     * Attach to {@link ListView} so that {@link VanGogh} could pause or resume the image request
+     * by ListView's scroll state.
+     *
+     * @param listener The user's {@link ListView.OnScrollListener}
+     * @see #attachToListView(ListView)
+     */
     public void attachToListView(ListView view, ListView.OnScrollListener listener) {
         view.setOnScrollListener(new ListViewScrollListener(this, listener));
     }
