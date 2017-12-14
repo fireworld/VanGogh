@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
  * xx.ch@outlook.com
  */
 class EmptyTarget implements Target {
-    final static EmptyTarget EMPTY = new EmptyTarget();
+    final static Target EMPTY = new EmptyTarget();
 
     private EmptyTarget() {
 

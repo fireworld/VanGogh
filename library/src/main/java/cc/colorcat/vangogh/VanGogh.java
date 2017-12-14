@@ -132,7 +132,7 @@ public class VanGogh {
      * Create a {@link Task.Creator} using the specified image file.
      *
      * @see #load(Uri)
-     * @see #load(File)
+     * @see #load(String)
      * @see #load(int)
      */
     public Task.Creator load(File file) {
@@ -156,38 +156,33 @@ public class VanGogh {
     }
 
     /**
-     * Attach to {@link ListView} so that {@link VanGogh} could pause or resume the image request
-     * by ListView's scroll state.
+     * Pause all tasks.
      *
-     * @see #attachToListView(ListView, ListView.OnScrollListener)
+     * @see #resume()
      */
-    public void attachToListView(ListView view) {
-        attachToListView(view, null);
-    }
-
-    /**
-     * Attach to {@link ListView} so that {@link VanGogh} could pause or resume the image request
-     * by ListView's scroll state.
-     *
-     * @param listener The user's {@link ListView.OnScrollListener}
-     * @see #attachToListView(ListView)
-     */
-    public void attachToListView(ListView view, ListView.OnScrollListener listener) {
-        view.setOnScrollListener(new ListViewScrollListener(this, listener));
-    }
-
     public void pause() {
         dispatcher.pause();
     }
 
+    /**
+     * Resume all tasks.
+     *
+     * @see #pause()
+     */
     public void resume() {
         dispatcher.resume();
     }
 
+    /**
+     * Clear all pending tasks.
+     */
     public void clear() {
         dispatcher.clear();
     }
 
+    /**
+     * Clear all cached bitmaps from the memory.
+     */
     public void releaseMemory() {
         memoryCache.clear();
     }
@@ -264,7 +259,7 @@ public class VanGogh {
         return errorDrawable;
     }
 
-    Bitmap quickMemoryCacheCheck(String stableKey) {
+    Bitmap checkMemoryCache(String stableKey) {
         return memoryCache.get(stableKey);
     }
 

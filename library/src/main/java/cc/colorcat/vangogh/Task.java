@@ -1,6 +1,5 @@
 package cc.colorcat.vangogh;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class Task {
-    private final Resources resources;
+    private final VanGogh vanGogh;
 
     private final Uri uri;
     private final String stableKey;
@@ -35,9 +34,10 @@ public class Task {
 
     private final List<Transformation> transformations;
     private final boolean fade;
+    private final Callback callback;
 
     private Task(Creator creator) {
-        resources = creator.vanGogh.resources();
+        vanGogh = creator.vanGogh;
         uri = creator.uri;
         stableKey = creator.stableKey;
         fromPolicy = creator.fromPolicy;
@@ -49,6 +49,7 @@ public class Task {
         options = creator.options;
         transformations = Utils.immutableList(creator.transformations);
         fade = creator.fade;
+        callback = creator.callback;
     }
 
     public Uri uri() {
@@ -79,22 +80,29 @@ public class Task {
         return transformations;
     }
 
+    public Task.Creator newCreator() {
+        return new Creator(this);
+    }
+
     void onPreExecute() {
         target.onPrepare(loadingDrawable);
     }
 
     void onPostResult(Result result, Exception cause) {
         if (result != null) {
-            target.onLoaded(new VanGoghDrawable(resources, result.bitmap(), fade), result.from());
+            Bitmap bitmap = result.bitmap();
+            target.onLoaded(new VanGoghDrawable(vanGogh.resources(), bitmap, fade), result.from());
+            callback.onSuccess(bitmap);
         } else if (cause != null) {
             target.onFailed(errorDrawable, cause);
+            callback.onError(cause);
         }
     }
 
     @Override
     public String toString() {
         return "Task{" +
-                "resources=" + resources +
+                "vanGogh=" + vanGogh +
                 ", uri=" + uri +
                 ", stableKey='" + stableKey + '\'' +
                 ", fromPolicy=" + fromPolicy +
@@ -106,9 +114,9 @@ public class Task {
                 ", options=" + options +
                 ", transformations=" + transformations +
                 ", fade=" + fade +
+                ", callback=" + callback +
                 '}';
     }
-
 
     public static class Options implements Cloneable {
         private Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -254,7 +262,7 @@ public class Task {
 
         private List<Transformation> transformations;
         private boolean fade;
-        private Callback callback;
+        private Callback callback = EmptyCallback.EMPTY;
 
         Creator(VanGogh vanGogh, Uri uri, String stableKey) {
             this.vanGogh = vanGogh;
@@ -268,6 +276,22 @@ public class Task {
             this.options = vanGogh.defaultOptions();
             this.transformations = new ArrayList<>(vanGogh.transformations());
             this.fade = vanGogh.fade();
+        }
+
+        Creator(Task task) {
+            this.vanGogh = task.vanGogh;
+            this.uri = task.uri;
+            this.stableKey = task.stableKey;
+            this.fromPolicy = task.fromPolicy;
+            this.connectTimeOut = task.connectTimeOut;
+            this.readTimeOut = task.readTimeOut;
+            this.target = task.target;
+            this.loadingDrawable = task.loadingDrawable;
+            this.errorDrawable = task.errorDrawable;
+            this.options = task.options;
+            this.transformations = new ArrayList<>(task.transformations);
+            this.fade = task.fade;
+            this.callback = task.callback;
         }
 
         /**
@@ -377,7 +401,7 @@ public class Task {
         }
 
         public Creator callback(Callback callback) {
-            this.callback = callback;
+            this.callback = (callback != null ? callback : EmptyCallback.EMPTY);
             return this;
         }
 
@@ -401,26 +425,28 @@ public class Task {
         }
 
         public void fetch(Callback callback) {
-            this.callback = callback;
+            this.callback = (callback != null ? callback : EmptyCallback.EMPTY);
             quickFetchOrEnqueue();
         }
 
+        public Task create() {
+            return new Task(this);
+        }
+
         private void quickFetchOrEnqueue() {
-            if (callback != null) {
-                target = new TargetProxy(target, callback);
-            }
             int policy = fromPolicy & From.MEMORY.policy;
             if (policy != 0 && !options.hasRotation() && !options.hasSize() && transformations.isEmpty()) {
-                Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
+                Bitmap bitmap = vanGogh.checkMemoryCache(stableKey);
                 if (bitmap != null) {
                     if (vanGogh.debug()) {
                         bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor, options);
                     }
                     target.onLoaded(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
+                    callback.onSuccess(bitmap);
                     return;
                 }
             }
-            vanGogh.enqueue(new Task(this));
+            vanGogh.enqueue(create());
         }
     }
 }
