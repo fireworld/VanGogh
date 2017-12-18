@@ -39,7 +39,7 @@ public class ResultParser<T> implements Parser<T> {
             int code = result.getStatus();
             T data = result.getData();
             if (code == Result.STATUS_OK && data != null) {
-                return NetworkData.newSuccess(result.getData());
+                return NetworkData.newSuccess(data);
             }
             return NetworkData.newFailure(code, result.getMsg());
         } catch (JsonParseException e) {
