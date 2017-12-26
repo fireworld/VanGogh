@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
-import android.widget.ListView;
 
 import java.io.File;
 import java.io.IOException;
@@ -303,6 +302,9 @@ public class VanGogh {
             theme = context.getTheme();
         }
 
+        /**
+         * @param executor The executor service for loading images in the background.
+         */
         public Builder executor(ExecutorService executor) {
             if (executor == null) {
                 throw new NullPointerException("executor == null");
@@ -311,6 +313,10 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * @param maxRunning The maximum number of concurrent tasks.
+         * @throws IllegalArgumentException if the maxRunning less than 1.
+         */
         public Builder maxRunning(int maxRunning) {
             if (maxRunning < 1) {
                 throw new IllegalArgumentException("maxRunning < 1");
@@ -319,6 +325,10 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * @param retryCount The maximum number of retries.
+         * @throws IllegalArgumentException if the retryCount less than 0.
+         */
         public Builder retryCount(int retryCount) {
             if (retryCount < 0) {
                 throw new IllegalArgumentException("retryCount < 0");
@@ -353,6 +363,11 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * @param downloader The {@link Downloader} will be used for download images.
+         * @throws NullPointerException if downloader is null
+         * @see HttpDownloader
+         */
         public Builder downloader(Downloader downloader) {
             if (downloader == null) {
                 throw new NullPointerException("downloader == null");
@@ -361,6 +376,12 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * The default policy of image source.
+         * Any source, <code>From.ANY.policy</code>
+         * Memory and disk, <code>From.MEMORY.policy | From.DISK.policy</code>
+         * Memory and network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
+         */
         public Builder defaultFromPolicy(int fromPolicy) {
             From.checkFromPolicy(fromPolicy);
             this.defaultFromPolicy = fromPolicy;
