@@ -379,8 +379,9 @@ public class VanGogh {
         /**
          * The default policy of image source.
          * Any source, <code>From.ANY.policy</code>
-         * Memory and disk, <code>From.MEMORY.policy | From.DISK.policy</code>
-         * Memory and network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * Memory and Disk, <code>From.MEMORY.policy | From.DISK.policy</code>
+         * Memory and Network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * ...
          */
         public Builder defaultFromPolicy(int fromPolicy) {
             From.checkFromPolicy(fromPolicy);
@@ -440,11 +441,17 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * The default drawable to be used while the image is being loaded.
+         */
         public Builder defaultLoading(Drawable loading) {
             loadingDrawable = loading;
             return this;
         }
 
+        /**
+         * The default drawable to be used while the image is being loaded.
+         */
         public Builder defaultLoading(@DrawableRes int resId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 loadingDrawable = resources.getDrawable(resId, theme);
@@ -454,11 +461,17 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * The default drawable to be used if the request image could not be loaded.
+         */
         public Builder defaultError(Drawable error) {
             errorDrawable = error;
             return this;
         }
 
+        /**
+         * The default drawable to be used if the request image could not be loaded.
+         */
         public Builder defaultError(@DrawableRes int resId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 errorDrawable = resources.getDrawable(resId, theme);
