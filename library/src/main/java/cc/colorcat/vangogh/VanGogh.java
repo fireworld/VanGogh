@@ -78,6 +78,13 @@ public class VanGogh {
         return singleton;
     }
 
+    public static VanGogh get() {
+        if (singleton == null) {
+            throw new IllegalStateException("The singleton is null.");
+        }
+        return singleton;
+    }
+
     private VanGogh(Builder builder, Cache<Bitmap> memoryCache, DiskCache diskCache) {
         maxRunning = builder.maxRunning;
         retryCount = builder.retryCount;
