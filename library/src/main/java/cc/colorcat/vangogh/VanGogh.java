@@ -382,6 +382,8 @@ public class VanGogh {
          * Memory and Disk, <code>From.MEMORY.policy | From.DISK.policy</code>
          * Memory and Network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
          * ...
+         *
+         * @see From
          */
         public Builder defaultFromPolicy(int fromPolicy) {
             From.checkFromPolicy(fromPolicy);

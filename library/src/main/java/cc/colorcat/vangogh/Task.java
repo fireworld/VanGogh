@@ -295,15 +295,12 @@ public class Task {
         }
 
         /**
-         * 数据来源策略配置，含内存、磁盘、网络三种基本模式，也可将三种模式组合使用
-         * 如默认的 {@link From#ANY#policy} 即是将三种模式组合使用，会按照优先内存，其次磁盘，最后网络的顺序获取
-         * 如需其它的组合方式，可使用如下形式：
-         * 只从内存和磁盘：<code>From.MEMORY.policy | From.DISK.policy</code>
-         * 只从内存和网络：<code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * The policy of image source.
+         * Any source, <code>From.ANY.policy</code>
+         * Memory and Disk, <code>From.MEMORY.policy | From.DISK.policy</code>
+         * Memory and Network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
          * ...
          *
-         * @param fromPolicy {@link From#MEMORY#policy}, {@link From#DISK#policy},
-         *                   {@link From#NETWORK#policy}, {@link From#ANY#policy}
          * @see From
          */
         public Creator from(int fromPolicy) {
@@ -328,6 +325,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * The drawable to be used while the image is being loaded.
+         */
         public Creator loading(@DrawableRes int loadingResId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId, vanGogh.theme());
@@ -337,12 +337,19 @@ public class Task {
             return this;
         }
 
+        /**
+         * The drawable to be used while the image is being loaded.
+         */
         public Creator loading(Drawable loading) {
             if (loading == null) throw new NullPointerException("loading == null");
             loadingDrawable = loading;
             return this;
         }
 
+
+        /**
+         * The drawable to be used if the request image could not be loaded.
+         */
         public Creator error(@DrawableRes int errorResId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 errorDrawable = vanGogh.resources().getDrawable(errorResId, vanGogh.theme());
@@ -352,6 +359,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * The drawable to be used if the request image could not be loaded.
+         */
         public Creator error(Drawable error) {
             if (error == null) {
                 throw new NullPointerException("error == null");
@@ -360,6 +370,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * Resize the image to the specified size in pixels.
+         */
         public Creator resize(int width, int height) {
             options.resize(width, height);
             return this;
@@ -370,16 +383,25 @@ public class Task {
             return this;
         }
 
+        /**
+         * Rotate the image by the specified degrees.
+         */
         public Creator rotate(float degrees) {
             options.rotate(degrees);
             return this;
         }
 
+        /**
+         * Rotate the image by the specified degrees around a pivot point.
+         */
         public Creator rotate(float degrees, float pivotX, float pivotY) {
             options.rotate(degrees, pivotX, pivotY);
             return this;
         }
 
+        /**
+         * Resize the image to less than the specified size in pixels.
+         */
         public Creator maxSize(int maxWidth, int maxHeight) {
             options.maxSize(maxWidth, maxHeight);
             return this;
