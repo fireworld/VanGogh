@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
-import android.widget.ListView;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +50,10 @@ public class VanGogh {
 
     private final boolean fade;
 
+    /**
+     * Set the global instance.
+     * NOTE: This method must be called before calls to {@link #with}.
+     */
     public static void setSingleton(VanGogh vanGogh) {
         synchronized (VanGogh.class) {
             if (singleton != null) {
@@ -60,6 +63,10 @@ public class VanGogh {
         }
     }
 
+    /**
+     * Get the global instance.
+     * If the global instance is null which will be initialized with default.
+     */
     public static VanGogh with(Context ctx) {
         if (singleton == null) {
             synchronized (VanGogh.class) {
@@ -67,6 +74,13 @@ public class VanGogh {
                     singleton = new Builder(ctx).build();
                 }
             }
+        }
+        return singleton;
+    }
+
+    public static VanGogh get() {
+        if (singleton == null) {
+            throw new IllegalStateException("The singleton is null.");
         }
         return singleton;
     }
@@ -92,6 +106,15 @@ public class VanGogh {
         this.dispatcher = new Dispatcher(this, builder.executor);
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified path.
+     *
+     * @param uri May be a remote URL, file or android resource.
+     * @throws IllegalArgumentException if {@code uri} is null or empty.
+     * @see #load(Uri)
+     * @see #load(File)
+     * @see #load(int)
+     */
     public Task.Creator load(String uri) {
         if (uri == null || uri.length() == 0) {
             throw new IllegalArgumentException("uri is empty");
@@ -99,15 +122,37 @@ public class VanGogh {
         return this.load(Uri.parse(uri));
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified drawable resource ID.
+     *
+     * @see #load(Uri)
+     * @see #load(File)
+     * @see #load(String)
+     */
     public Task.Creator load(@DrawableRes int resId) {
         Uri uri = Uri.parse(Utils.SCHEME_VANGOGH + "://" + Utils.HOST_RESOURCE + "?id=" + resId);
         return this.load(uri);
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified image file.
+     *
+     * @see #load(Uri)
+     * @see #load(String)
+     * @see #load(int)
+     */
     public Task.Creator load(File file) {
         return this.load(Uri.fromFile(file));
     }
 
+    /**
+     * Create a {@link Task.Creator} using the specified uri.
+     *
+     * @throws NullPointerException if {@code uri} is null.
+     * @see #load(String)
+     * @see #load(File)
+     * @see #load(int)
+     */
     public Task.Creator load(Uri uri) {
         if (uri == null) {
             throw new NullPointerException("uri == null");
@@ -116,32 +161,36 @@ public class VanGogh {
         return new Task.Creator(this, uri, stableKey);
     }
 
-    public void attachToListView(ListView view) {
-        attachToListView(view, null);
-    }
-
-    public void attachToListView(ListView view, ListView.OnScrollListener listener) {
-        view.setOnScrollListener(new ListViewScrollListener(this, listener));
-    }
-
+    /**
+     * Pause all tasks.
+     *
+     * @see #resume()
+     */
     public void pause() {
         dispatcher.pause();
     }
 
+    /**
+     * Resume all tasks.
+     *
+     * @see #pause()
+     */
     public void resume() {
         dispatcher.resume();
     }
 
+    /**
+     * Clear all pending tasks.
+     */
     public void clear() {
         dispatcher.clear();
     }
 
+    /**
+     * Clear all cached bitmaps from the memory.
+     */
     public void releaseMemory() {
         memoryCache.clear();
-    }
-
-    public void close() {
-        singleton = null;
     }
 
     void enqueue(Task task) {
@@ -216,7 +265,7 @@ public class VanGogh {
         return errorDrawable;
     }
 
-    Bitmap quickMemoryCacheCheck(String stableKey) {
+    Bitmap checkMemoryCache(String stableKey) {
         return memoryCache.get(stableKey);
     }
 
@@ -260,6 +309,9 @@ public class VanGogh {
             theme = context.getTheme();
         }
 
+        /**
+         * @param executor The executor service for loading images in the background.
+         */
         public Builder executor(ExecutorService executor) {
             if (executor == null) {
                 throw new NullPointerException("executor == null");
@@ -268,6 +320,10 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * @param maxRunning The maximum number of concurrent tasks.
+         * @throws IllegalArgumentException if the maxRunning less than 1.
+         */
         public Builder maxRunning(int maxRunning) {
             if (maxRunning < 1) {
                 throw new IllegalArgumentException("maxRunning < 1");
@@ -276,6 +332,10 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * @param retryCount The maximum number of retries.
+         * @throws IllegalArgumentException if the retryCount less than 0.
+         */
         public Builder retryCount(int retryCount) {
             if (retryCount < 0) {
                 throw new IllegalArgumentException("retryCount < 0");
@@ -310,6 +370,11 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * @param downloader The {@link Downloader} will be used for download images.
+         * @throws NullPointerException if downloader is null
+         * @see HttpDownloader
+         */
         public Builder downloader(Downloader downloader) {
             if (downloader == null) {
                 throw new NullPointerException("downloader == null");
@@ -318,6 +383,15 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * The default policy of image source.
+         * Any source, <code>From.ANY.policy</code>
+         * Memory and Disk, <code>From.MEMORY.policy | From.DISK.policy</code>
+         * Memory and Network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * ...
+         *
+         * @see From
+         */
         public Builder defaultFromPolicy(int fromPolicy) {
             From.checkFromPolicy(fromPolicy);
             this.defaultFromPolicy = fromPolicy;
@@ -376,11 +450,17 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * The default drawable to be used while the image is being loaded.
+         */
         public Builder defaultLoading(Drawable loading) {
             loadingDrawable = loading;
             return this;
         }
 
+        /**
+         * The default drawable to be used while the image is being loaded.
+         */
         public Builder defaultLoading(@DrawableRes int resId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 loadingDrawable = resources.getDrawable(resId, theme);
@@ -390,11 +470,17 @@ public class VanGogh {
             return this;
         }
 
+        /**
+         * The default drawable to be used if the request image could not be loaded.
+         */
         public Builder defaultError(Drawable error) {
             errorDrawable = error;
             return this;
         }
 
+        /**
+         * The default drawable to be used if the request image could not be loaded.
+         */
         public Builder defaultError(@DrawableRes int resId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 errorDrawable = resources.getDrawable(resId, theme);

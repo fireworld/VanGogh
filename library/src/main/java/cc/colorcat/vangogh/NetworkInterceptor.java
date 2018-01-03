@@ -9,10 +9,8 @@ import java.io.IOException;
 class NetworkInterceptor implements Interceptor {
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
-    private VanGogh vanGogh;
 
-    NetworkInterceptor(VanGogh vanGogh) {
-        this.vanGogh = vanGogh;
+    NetworkInterceptor() {
     }
 
     @Override
@@ -22,7 +20,7 @@ class NetworkInterceptor implements Interceptor {
         String scheme = task.uri().getScheme();
         if (fromPolicy != 0 && (HTTP.equalsIgnoreCase(scheme) || HTTPS.equalsIgnoreCase(scheme))) {
             Downloader downloader = chain.loader();
-            Result result = downloader.load(vanGogh, task);
+            Result result = downloader.load(task);
             if (result != null) {
                 return result;
             }

@@ -1,6 +1,5 @@
 package cc.colorcat.vangogh;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class Task {
-    private final Resources resources;
+    private final VanGogh vanGogh;
 
     private final Uri uri;
     private final String stableKey;
@@ -35,9 +34,10 @@ public class Task {
 
     private final List<Transformation> transformations;
     private final boolean fade;
+    private final Callback callback;
 
     private Task(Creator creator) {
-        resources = creator.vanGogh.resources();
+        vanGogh = creator.vanGogh;
         uri = creator.uri;
         stableKey = creator.stableKey;
         fromPolicy = creator.fromPolicy;
@@ -49,6 +49,7 @@ public class Task {
         options = creator.options;
         transformations = Utils.immutableList(creator.transformations);
         fade = creator.fade;
+        callback = creator.callback;
     }
 
     public Uri uri() {
@@ -79,22 +80,29 @@ public class Task {
         return transformations;
     }
 
+    public Task.Creator newCreator() {
+        return new Creator(this);
+    }
+
     void onPreExecute() {
         target.onPrepare(loadingDrawable);
     }
 
     void onPostResult(Result result, Exception cause) {
         if (result != null) {
-            target.onLoaded(new VanGoghDrawable(resources, result.bitmap(), fade), result.from());
+            Bitmap bitmap = result.bitmap();
+            target.onLoaded(new VanGoghDrawable(vanGogh.resources(), bitmap, fade), result.from());
+            callback.onSuccess(bitmap);
         } else if (cause != null) {
             target.onFailed(errorDrawable, cause);
+            callback.onError(cause);
         }
     }
 
     @Override
     public String toString() {
         return "Task{" +
-                "resources=" + resources +
+                "vanGogh=" + vanGogh +
                 ", uri=" + uri +
                 ", stableKey='" + stableKey + '\'' +
                 ", fromPolicy=" + fromPolicy +
@@ -106,9 +114,9 @@ public class Task {
                 ", options=" + options +
                 ", transformations=" + transformations +
                 ", fade=" + fade +
+                ", callback=" + callback +
                 '}';
     }
-
 
     public static class Options implements Cloneable {
         private Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -254,7 +262,7 @@ public class Task {
 
         private List<Transformation> transformations;
         private boolean fade;
-        private Callback callback;
+        private Callback callback = EmptyCallback.EMPTY;
 
         Creator(VanGogh vanGogh, Uri uri, String stableKey) {
             this.vanGogh = vanGogh;
@@ -270,16 +278,29 @@ public class Task {
             this.fade = vanGogh.fade();
         }
 
+        Creator(Task task) {
+            this.vanGogh = task.vanGogh;
+            this.uri = task.uri;
+            this.stableKey = task.stableKey;
+            this.fromPolicy = task.fromPolicy;
+            this.connectTimeOut = task.connectTimeOut;
+            this.readTimeOut = task.readTimeOut;
+            this.target = task.target;
+            this.loadingDrawable = task.loadingDrawable;
+            this.errorDrawable = task.errorDrawable;
+            this.options = task.options;
+            this.transformations = new ArrayList<>(task.transformations);
+            this.fade = task.fade;
+            this.callback = task.callback;
+        }
+
         /**
-         * 数据来源策略配置，含内存、磁盘、网络三种基本模式，也可将三种模式组合使用
-         * 如默认的 {@link From#ANY#policy} 即是将三种模式组合使用，会按照优先内存，其次磁盘，最后网络的顺序获取
-         * 如需其它的组合方式，可使用如下形式：
-         * 只从内存和磁盘：<code>From.MEMORY.policy | From.DISK.policy</code>
-         * 只从内存和网络：<code>From.MEMORY.policy | From.NETWORK.policy</code>
+         * The policy of image source.
+         * Any source, <code>From.ANY.policy</code>
+         * Memory and Disk, <code>From.MEMORY.policy | From.DISK.policy</code>
+         * Memory and Network, <code>From.MEMORY.policy | From.NETWORK.policy</code>
          * ...
          *
-         * @param fromPolicy {@link From#MEMORY#policy}, {@link From#DISK#policy},
-         *                   {@link From#NETWORK#policy}, {@link From#ANY#policy}
          * @see From
          */
         public Creator from(int fromPolicy) {
@@ -304,6 +325,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * The drawable to be used while the image is being loaded.
+         */
         public Creator loading(@DrawableRes int loadingResId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 loadingDrawable = vanGogh.resources().getDrawable(loadingResId, vanGogh.theme());
@@ -313,12 +337,19 @@ public class Task {
             return this;
         }
 
+        /**
+         * The drawable to be used while the image is being loaded.
+         */
         public Creator loading(Drawable loading) {
             if (loading == null) throw new NullPointerException("loading == null");
             loadingDrawable = loading;
             return this;
         }
 
+
+        /**
+         * The drawable to be used if the request image could not be loaded.
+         */
         public Creator error(@DrawableRes int errorResId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 errorDrawable = vanGogh.resources().getDrawable(errorResId, vanGogh.theme());
@@ -328,6 +359,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * The drawable to be used if the request image could not be loaded.
+         */
         public Creator error(Drawable error) {
             if (error == null) {
                 throw new NullPointerException("error == null");
@@ -336,6 +370,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * Resize the image to the specified size in pixels.
+         */
         public Creator resize(int width, int height) {
             options.resize(width, height);
             return this;
@@ -346,16 +383,25 @@ public class Task {
             return this;
         }
 
+        /**
+         * Rotate the image by the specified degrees.
+         */
         public Creator rotate(float degrees) {
             options.rotate(degrees);
             return this;
         }
 
+        /**
+         * Rotate the image by the specified degrees around a pivot point.
+         */
         public Creator rotate(float degrees, float pivotX, float pivotY) {
             options.rotate(degrees, pivotX, pivotY);
             return this;
         }
 
+        /**
+         * Resize the image to less than the specified size in pixels.
+         */
         public Creator maxSize(int maxWidth, int maxHeight) {
             options.maxSize(maxWidth, maxHeight);
             return this;
@@ -377,7 +423,7 @@ public class Task {
         }
 
         public Creator callback(Callback callback) {
-            this.callback = callback;
+            this.callback = (callback != null ? callback : EmptyCallback.EMPTY);
             return this;
         }
 
@@ -401,26 +447,28 @@ public class Task {
         }
 
         public void fetch(Callback callback) {
-            this.callback = callback;
+            this.callback = (callback != null ? callback : EmptyCallback.EMPTY);
             quickFetchOrEnqueue();
         }
 
+        public Task create() {
+            return new Task(this);
+        }
+
         private void quickFetchOrEnqueue() {
-            if (callback != null) {
-                target = new TargetProxy(target, callback);
-            }
             int policy = fromPolicy & From.MEMORY.policy;
             if (policy != 0 && !options.hasRotation() && !options.hasSize() && transformations.isEmpty()) {
-                Bitmap bitmap = vanGogh.quickMemoryCacheCheck(stableKey);
+                Bitmap bitmap = vanGogh.checkMemoryCache(stableKey);
                 if (bitmap != null) {
                     if (vanGogh.debug()) {
                         bitmap = Utils.makeWatermark(bitmap, From.MEMORY.debugColor, options);
                     }
                     target.onLoaded(new BitmapDrawable(vanGogh.resources(), bitmap), From.MEMORY);
+                    callback.onSuccess(bitmap);
                     return;
                 }
             }
-            vanGogh.enqueue(new Task(this));
+            vanGogh.enqueue(create());
         }
     }
 }

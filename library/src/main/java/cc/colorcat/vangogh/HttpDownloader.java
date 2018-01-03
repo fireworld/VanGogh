@@ -15,7 +15,7 @@ class HttpDownloader implements Downloader {
     private HttpURLConnection conn;
 
     @Override
-    public Result load(VanGogh vanGogh, Task task) throws IOException {
+    public Result load(Task task) throws IOException {
         Uri uri = task.uri();
         conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
         conn.setRequestMethod("GET");

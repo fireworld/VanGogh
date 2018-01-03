@@ -53,7 +53,7 @@ class RealCall implements Call {
         if (cache != null) {
             interceptors.add(new DiskCacheInterceptor(cache));
         }
-        interceptors.add(new NetworkInterceptor(vanGogh));
+        interceptors.add(new NetworkInterceptor());
         Interceptor.Chain chain = new RealInterceptorChain(interceptors, 0, task, vanGogh.downloader());
         return chain.proceed(task);
     }
