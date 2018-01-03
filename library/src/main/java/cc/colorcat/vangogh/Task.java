@@ -417,6 +417,9 @@ public class Task {
             return this;
         }
 
+        /**
+         * @param fade Enable or disable fade in of images loaded.
+         */
         public Creator fade(boolean fade) {
             this.fade = fade;
             return this;
