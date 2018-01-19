@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
+import android.text.TextUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,16 +111,12 @@ public class VanGogh {
      * Create a {@link Task.Creator} using the specified path.
      *
      * @param uri May be a remote URL, file or android resource.
-     * @throws IllegalArgumentException if {@code uri} is null or empty.
      * @see #load(Uri)
      * @see #load(File)
      * @see #load(int)
      */
     public Task.Creator load(String uri) {
-        if (uri == null || uri.length() == 0) {
-            throw new IllegalArgumentException("uri is empty");
-        }
-        return this.load(Uri.parse(uri));
+        return this.load(TextUtils.isEmpty(uri) ? Uri.EMPTY : Uri.parse(uri));
     }
 
     /**
@@ -142,23 +139,20 @@ public class VanGogh {
      * @see #load(int)
      */
     public Task.Creator load(File file) {
-        return this.load(Uri.fromFile(file));
+        return this.load(file == null ? Uri.EMPTY : Uri.fromFile(file));
     }
 
     /**
      * Create a {@link Task.Creator} using the specified uri.
      *
-     * @throws NullPointerException if {@code uri} is null.
      * @see #load(String)
      * @see #load(File)
      * @see #load(int)
      */
     public Task.Creator load(Uri uri) {
-        if (uri == null) {
-            throw new NullPointerException("uri == null");
-        }
-        String stableKey = Utils.md5(uri.toString());
-        return new Task.Creator(this, uri, stableKey);
+        Uri u = (uri == null ? Uri.EMPTY : uri);
+        String stableKey = Utils.md5(u.toString());
+        return new Task.Creator(this, u, stableKey);
     }
 
     /**
