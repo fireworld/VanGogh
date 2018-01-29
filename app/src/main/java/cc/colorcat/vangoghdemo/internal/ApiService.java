@@ -5,15 +5,17 @@ import android.content.Context;
 import java.io.File;
 import java.io.IOException;
 
-import cc.colorcat.netbird3.MRequest;
-import cc.colorcat.netbird3.NetBird;
-import cc.colorcat.netbird3.android.AndroidLogger;
-import cc.colorcat.netbird3.logging.Filter;
-import cc.colorcat.netbird3.logging.LoggingTailInterceptor;
+import cc.colorcat.netbird4.Level;
+import cc.colorcat.netbird4.MRequest;
+import cc.colorcat.netbird4.NetBird;
+import cc.colorcat.netbird4.logging.LoggingTailInterceptor;
 import cc.colorcat.vangogh.Task;
 import cc.colorcat.vangogh.VanGogh;
 import cc.colorcat.vangoghdemo.BuildConfig;
 import cc.colorcat.vangoghdemo.R;
+
+//import cc.colorcat.netbird4.android.AndroidLogger;
+//import cc.colorcat.netbird4.logging.Filter;
 
 /**
  * Created by cxx on 2017/8/9.
@@ -32,9 +34,9 @@ public final class ApiService {
                 .connectTimeOut(TIME_OUT_CONNECT)
                 .readTimeOut(TIME_OUT_READ)
                 .enableGzip(true)
-                .enableExceptionLog(debug);
+                .logLevel(debug ? Level.VERBOSE : Level.NOTHING);
         if (debug) {
-            nBuilder.addTailInterceptor(new LoggingTailInterceptor(new AndroidLogger(), new LoggingFilter()));
+            nBuilder.addTailInterceptor(new LoggingTailInterceptor());
         }
         netBird = nBuilder.build();
 
@@ -72,11 +74,11 @@ public final class ApiService {
         throw new AssertionError("no instance");
     }
 
-    private static class LoggingFilter implements Filter {
-        @Override
-        public boolean filter(String contentType) {
-            String s = contentType.toLowerCase();
-            return s.contains("json") || s.contains("text");
-        }
-    }
+//    private static class LoggingFilter implements Filter {
+//        @Override
+//        public boolean filter(String contentType) {
+//            String s = contentType.toLowerCase();
+//            return s.contains("json") || s.contains("text");
+//        }
+//    }
 }

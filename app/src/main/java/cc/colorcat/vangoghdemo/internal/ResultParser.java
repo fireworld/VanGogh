@@ -7,10 +7,10 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 
-import cc.colorcat.netbird3.NetworkData;
-import cc.colorcat.netbird3.Parser;
-import cc.colorcat.netbird3.Response;
-import cc.colorcat.netbird3.StateIOException;
+import cc.colorcat.netbird4.NetworkData;
+import cc.colorcat.netbird4.Parser;
+import cc.colorcat.netbird4.Response;
+import cc.colorcat.netbird4.StateIOException;
 
 /**
  * Created by cxx on 17-11-22.
@@ -34,7 +34,7 @@ public class ResultParser<T> implements Parser<T> {
     @Override
     public NetworkData<? extends T> parse(@NonNull Response response) throws IOException {
         try {
-            String content = response.body().string();
+            String content = response.responseBody().string();
             Result<T> result = Utils.fromJson(content, token);
             int code = result.getStatus();
             T data = result.getData();
@@ -43,7 +43,7 @@ public class ResultParser<T> implements Parser<T> {
             }
             return NetworkData.newFailure(code, result.getMsg());
         } catch (JsonParseException e) {
-            throw new StateIOException(response.msg(), e, response.code());
+            throw new StateIOException(response.responseCode(), response.responseMsg(), e);
         }
     }
 }

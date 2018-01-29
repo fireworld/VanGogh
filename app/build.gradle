@@ -38,7 +38,4 @@ dependencies {
     compile rootProject.ext.gson
     implementation rootProject.ext.picasso
     testCompile rootProject.ext.junit
-    implementation files('libs/netbird-3.0.0.jar')
-    implementation files('libs/netbird-android-support.jar')
-    implementation files('libs/netbird-logging-support.jar')
 }
