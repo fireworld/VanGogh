@@ -5,8 +5,8 @@ import android.support.annotation.CallSuper;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
-import cc.colorcat.netbird3.HttpStatus;
-import cc.colorcat.netbird3.MRequest;
+import cc.colorcat.netbird4.HttpStatus;
+import cc.colorcat.netbird4.MRequest;
 import cc.colorcat.vangoghdemo.contract.IBase;
 
 /**

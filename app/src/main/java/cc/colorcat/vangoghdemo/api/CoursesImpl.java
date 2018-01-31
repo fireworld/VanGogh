@@ -4,8 +4,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
 
-import cc.colorcat.netbird3.MRequest;
-import cc.colorcat.netbird3.Method;
+import cc.colorcat.netbird4.MRequest;
+import cc.colorcat.netbird4.Method;
 import cc.colorcat.vangoghdemo.entity.Course;
 import cc.colorcat.vangoghdemo.internal.Result;
 import cc.colorcat.vangoghdemo.internal.ResultParser;

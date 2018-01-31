@@ -3,7 +3,7 @@ package cc.colorcat.vangoghdemo.api;
 import java.io.IOException;
 import java.util.List;
 
-import cc.colorcat.netbird3.MRequest;
+import cc.colorcat.netbird4.MRequest;
 import cc.colorcat.vangoghdemo.entity.Course;
 
 /**
