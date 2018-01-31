@@ -133,11 +133,9 @@ public abstract class BaseFragment extends Fragment implements IBase.View {
     @Override
     public void toast(CharSequence text) {
         if (isActive()) {
-            if (isActive()) {
-                Context ctx = getContext();
-                if (ctx != null) {
-                    Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show();
-                }
+            Context ctx = getContext();
+            if (ctx != null) {
+                Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show();
             }
         }
     }
