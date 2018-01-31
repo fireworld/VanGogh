@@ -22,8 +22,8 @@ public abstract class BaseImpl<T> implements Api.Base<T> {
         MRequest<T> request = builder()
                 .listener(listener)
                 .build();
-        tag = request.tag();
-        return ApiService.send(request);
+        tag = ApiService.send(request);
+        return tag;
     }
 
     @Override
