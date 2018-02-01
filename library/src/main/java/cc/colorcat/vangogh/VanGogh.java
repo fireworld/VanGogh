@@ -266,14 +266,14 @@ public class VanGogh {
 
     public static class Builder {
         private ExecutorService executor;
-        private int maxRunning = 6;
-        private int retryCount = 1;
-        private int connectTimeOut = 5000;
-        private int readTimeOut = 5000;
+        private int maxRunning;
+        private int retryCount;
+        private int connectTimeOut;
+        private int readTimeOut;
 
-        private List<Interceptor> interceptors = new ArrayList<>(4);
+        private List<Interceptor> interceptors;
         private Downloader downloader;
-        private int defaultFromPolicy = From.ANY.policy;
+        private int defaultFromPolicy;
 
         private long memoryCacheSize;
         private File cacheDirectory;
@@ -282,25 +282,31 @@ public class VanGogh {
         private Task.Options defaultOptions;
         private Resources resources;
         private Resources.Theme theme;
-        private boolean debug = false;
+        private boolean debug;
 
-        private List<Transformation> transformations = new ArrayList<>(4);
-        private boolean fade = true;
+        private List<Transformation> transformations;
+        private boolean fade;
 
         private Drawable loadingDrawable;
         private Drawable errorDrawable;
 
         public Builder(Context context) {
-            if (context == null) {
-                throw new NullPointerException("context == null");
-            }
+            maxRunning = 6;
+            retryCount = 1;
+            connectTimeOut = 5000;
+            readTimeOut = 5000;
+            interceptors = new ArrayList<>(4);
             downloader = new HttpDownloader();
+            defaultFromPolicy = From.ANY.policy;
             memoryCacheSize = Utils.calculateMemoryCacheSize(context);
             cacheDirectory = Utils.getCacheDirectory(context);
             diskCacheSize = (long) Math.min(50 * 1024 * 1024, cacheDirectory.getUsableSpace() * 0.1);
             defaultOptions = new Task.Options();
             resources = context.getResources();
             theme = context.getTheme();
+            debug = false;
+            transformations = new ArrayList<>(4);
+            fade = true;
         }
 
         /**

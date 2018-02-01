@@ -68,7 +68,11 @@ class Utils {
         if (dir == null) {
             dir = context.getCacheDir();
         }
-        return new File(dir, "VanGogh");
+        File result = new File(dir, "VanGogh");
+        if (result.exists() || result.mkdirs()) {
+            return result;
+        }
+        throw new RuntimeException("Can't create directory " + result.getAbsolutePath());
     }
 
     static int calculateMemoryCacheSize(Context ctx) {
