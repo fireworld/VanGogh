@@ -20,6 +20,10 @@ public interface IBase {
         void toast(@StringRes int resId);
 
         void toast(CharSequence text);
+
+        void showNetworkError();
+
+        void hideNetworkError();
     }
 
     interface Presenter<V extends View> {

@@ -24,8 +24,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.colorcat.vangoghdemo.R;
 import cc.colorcat.vangoghdemo.contract.IBase;
 import cc.colorcat.vangoghdemo.internal.PermissionListener;
+import cc.colorcat.vangoghdemo.widget.Tip;
 
 /**
  * Created by cxx on 17-9-29.
@@ -138,6 +140,31 @@ public class BaseDialogFragment extends DialogFragment implements IBase.View {
                 Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public void showNetworkError() {
+        getTip().showTip();
+    }
+
+    @Override
+    public void hideNetworkError() {
+        if (mTip != null) {
+            mTip.hideTip();
+        }
+    }
+
+    private Tip mTip;
+
+    protected Tip getTip() {
+        if (mTip == null) {
+            if (this instanceof Tip.Listener) {
+                mTip = Tip.from(this, R.layout.tip_network_error, (Tip.Listener) this);
+            } else {
+                mTip = Tip.from(this, R.layout.tip_network_error, null);
+            }
+        }
+        return mTip;
     }
 
     protected final void navigateTo(Class<? extends BaseActivity> clz) {

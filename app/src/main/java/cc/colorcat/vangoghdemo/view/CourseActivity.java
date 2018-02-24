@@ -25,16 +25,18 @@ import cc.colorcat.vangoghdemo.presenter.CoursePresenter;
 import cc.colorcat.vangoghdemo.widget.AutoChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.ChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvHolder;
+import cc.colorcat.vangoghdemo.widget.Tip;
 
 /**
  * Created by cxx on 17-11-22.
  * xx.ch@outlook.com
  */
-public class CourseActivity extends BaseActivity implements ICourses.View {
+public class CourseActivity extends BaseActivity implements ICourses.View, Tip.Listener {
     private static final String TAG = CourseActivity.class.getSimpleName();
 
     private ICourses.Presenter mPresenter = new CoursePresenter();
     private SwipeRefreshLayout mRefreshLayout;
+    private RecyclerView mRecyclerView;
     private List<Course> mCourses = new ArrayList<>(30);
     private ChoiceRvAdapter mAdapter;
     private int[] mUnselectable = {};
@@ -44,10 +46,10 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
 
-        RecyclerView recyclerView = findViewById(R.id.rv_courses);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addOnScrollListener(VanGoghScrollListener.get());
-        recyclerView.setAdapter(createAdapter());
+        mRecyclerView = findViewById(R.id.rv_courses);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.addOnScrollListener(VanGoghScrollListener.get());
+        mRecyclerView.setAdapter(createAdapter());
 
         mRefreshLayout = findViewById(R.id.srl_root);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -178,15 +180,53 @@ public class CourseActivity extends BaseActivity implements ICourses.View {
     }
 
     @Override
+    public void onTipClick() {
+        mPresenter.toRefreshCourses();
+    }
+
+    private int mCount = 0;
+
+    @Override
     public void refreshCourses(List<Course> courses) {
-        mCourses.clear();
-        mCourses.addAll(courses);
-        mAdapter.notifyDataSetChanged();
+        if ((mCount & 1) != 0) {
+            courses.clear();
+            showEmptyTip();
+        } else {
+            hideEmptyTip();
+            mCourses.clear();
+            mCourses.addAll(courses);
+            mAdapter.notifyDataSetChanged();
+        }
+        mCount++;
     }
 
     @Override
     public void stopRefresh() {
         mRefreshLayout.setRefreshing(false);
+    }
+
+    private Tip mEmptyTip;
+
+    private void showEmptyTip() {
+        getEmptyTip().showTip();
+    }
+
+    private void hideEmptyTip() {
+        if (mEmptyTip != null) {
+            mEmptyTip.hideTip();
+        }
+    }
+
+    private Tip getEmptyTip() {
+        if (mEmptyTip == null) {
+            mEmptyTip = Tip.from(mRecyclerView, R.layout.tip_empty, new Tip.Listener() {
+                @Override
+                public void onTipClick() {
+                    mPresenter.toRefreshCourses();
+                }
+            });
+        }
+        return mEmptyTip;
     }
 
     @Override

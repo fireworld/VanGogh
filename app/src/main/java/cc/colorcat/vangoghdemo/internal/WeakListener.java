@@ -64,7 +64,7 @@ public abstract class WeakListener<R, V extends IBase.View> implements MRequest.
     public void onFailure(V view, int code, String msg) {
         switch (code) {
             case HttpStatus.CODE_CONNECT_ERROR:
-                view.toast(cc.colorcat.vangoghdemo.R.string.connect_error);
+                view.showNetworkError();
                 break;
             default:
                 break;
