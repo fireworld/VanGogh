@@ -9,6 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
+        android:textColor="#FF0000"
         android:lineSpacingExtra="4sp"
         android:text="@string/tip_network_error" />
 </FrameLayout>

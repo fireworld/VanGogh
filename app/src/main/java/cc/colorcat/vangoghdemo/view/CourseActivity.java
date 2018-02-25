@@ -22,9 +22,9 @@ import cc.colorcat.vangoghdemo.contract.ICourses;
 import cc.colorcat.vangoghdemo.entity.Course;
 import cc.colorcat.vangoghdemo.internal.VanGoghScrollListener;
 import cc.colorcat.vangoghdemo.presenter.CoursePresenter;
-import cc.colorcat.vangoghdemo.widget.AutoChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.ChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.RvHolder;
+import cc.colorcat.vangoghdemo.widget.SimpleAutoChoiceRvAdapter;
 import cc.colorcat.vangoghdemo.widget.Tip;
 
 /**
@@ -36,7 +36,6 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
 
     private ICourses.Presenter mPresenter = new CoursePresenter();
     private SwipeRefreshLayout mRefreshLayout;
-    private RecyclerView mRecyclerView;
     private List<Course> mCourses = new ArrayList<>(30);
     private ChoiceRvAdapter mAdapter;
     private int[] mUnselectable = {};
@@ -46,10 +45,10 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
 
-        mRecyclerView = findViewById(R.id.rv_courses);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.addOnScrollListener(VanGoghScrollListener.get());
-        mRecyclerView.setAdapter(createAdapter());
+        RecyclerView recyclerView = findViewById(R.id.rv_courses);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addOnScrollListener(VanGoghScrollListener.get());
+        recyclerView.setAdapter(createAdapter());
 
         mRefreshLayout = findViewById(R.id.srl_root);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -62,51 +61,12 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
     }
 
     private ChoiceRvAdapter createAdapter() {
-//        mAdapter = new SimpleChoiceRvAdapter<Course>(mCourses, R.layout.item_course) {
-//            private final Transformation square = new SquareTransformation();
-//            private final Transformation circle = new CircleTransformation();
-//
-//            @Override
-//            public void bindView(RvHolder holder, Course data) {
-//                RvHolder.Helper helper = holder.getHelper();
-//                ImageView icon = helper.getView(R.id.iv_icon);
-//                Transformation trans = (helper.getPosition() & 1) == 0 ? circle : square;
-//                VanGogh.with(CourseActivity.this)
-//                        .load(data.getPicSmallUrl())
-//                        .addTransformation(trans)
-//                        .into(icon);
-//                helper.setText(R.id.tv_serial_number, String.valueOf(helper.getPosition()))
-//                        .setText(R.id.tv_name, data.getName())
-//                        .setText(R.id.tv_description, data.getDescription());
-//            }
-//
-//            @Override
-//            protected void updateItem(int position, boolean selected) {
-//                mCourses.get(position).setChecked(selected);
-//            }
-//
-//            @Override
-//            public boolean isSelected(int position) {
-//                return super.isSelected(position) || mCourses.get(position).isChecked();
-//            }
-//
-//            @Override
-//            public boolean isSelectable(int position) {
-//                return Arrays.binarySearch(mUnselectable, position) == -1;
-//            }
-//        };
-        mAdapter = new AutoChoiceRvAdapter() {
+        mAdapter = new SimpleAutoChoiceRvAdapter<Course>(mCourses, R.layout.item_course) {
             private final Transformation square = new SquareTransformation();
             private final Transformation circle = new CircleTransformation();
 
             @Override
-            public int getLayoutResId(int viewType) {
-                return R.layout.item_course;
-            }
-
-            @Override
-            public void bindView(RvHolder holder, int position) {
-                Course data = mCourses.get(position);
+            public void bindView(RvHolder holder, Course data) {
                 RvHolder.Helper helper = holder.getHelper();
                 ImageView icon = helper.getView(R.id.iv_icon);
                 Transformation trans = (helper.getPosition() & 1) == 0 ? circle : square;
@@ -117,11 +77,6 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
                 helper.setText(R.id.tv_serial_number, String.valueOf(helper.getPosition()))
                         .setText(R.id.tv_name, data.getName())
                         .setText(R.id.tv_description, data.getDescription());
-            }
-
-            @Override
-            public int getItemCount() {
-                return mCourses.size();
             }
         };
         mAdapter.setOnItemSelectedChangedListener(new ChoiceRvAdapter.OnItemSelectedChangedListener() {
@@ -162,11 +117,13 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
                 mAdapter.setSelection(0);
                 return true;
             case R.id.move:
-                List<Course> moved = new ArrayList<>(mCourses.subList(1, 4));
-                mCourses.removeAll(moved);
-                mAdapter.notifyItemRangeRemoved(1, 3);
-                mCourses.addAll(2, moved);
-                mAdapter.notifyItemRangeInserted(2, 3);
+                if (mCourses.size() >= 5) {
+                    List<Course> moved = new ArrayList<>(mCourses.subList(1, 4));
+                    mCourses.removeAll(moved);
+                    mAdapter.notifyItemRangeRemoved(1, 3);
+                    mCourses.addAll(2, moved);
+                    mAdapter.notifyItemRangeInserted(2, 3);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -184,49 +141,16 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
         mPresenter.toRefreshCourses();
     }
 
-    private int mCount = 0;
-
     @Override
     public void refreshCourses(List<Course> courses) {
-        if ((mCount & 1) != 0) {
-            courses.clear();
-            showEmptyTip();
-        } else {
-            hideEmptyTip();
-            mCourses.clear();
-            mCourses.addAll(courses);
-            mAdapter.notifyDataSetChanged();
-        }
-        mCount++;
+        mCourses.clear();
+        mCourses.addAll(courses);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void stopRefresh() {
         mRefreshLayout.setRefreshing(false);
-    }
-
-    private Tip mEmptyTip;
-
-    private void showEmptyTip() {
-        getEmptyTip().showTip();
-    }
-
-    private void hideEmptyTip() {
-        if (mEmptyTip != null) {
-            mEmptyTip.hideTip();
-        }
-    }
-
-    private Tip getEmptyTip() {
-        if (mEmptyTip == null) {
-            mEmptyTip = Tip.from(mRecyclerView, R.layout.tip_empty, new Tip.Listener() {
-                @Override
-                public void onTipClick() {
-                    mPresenter.toRefreshCourses();
-                }
-            });
-        }
-        return mEmptyTip;
     }
 
     @Override
