@@ -18,43 +18,42 @@ import android.view.ViewGroup;
 public class Tip {
     public static Tip from(@NonNull Activity activity, @LayoutRes int tipLayout, @Nullable Tip.Listener listener) {
         ViewGroup parent = activity.findViewById(android.R.id.content);
-        View content = parent.getChildAt(0);
-        return new Tip(parent, content, tipLayout, listener);
+        return new Tip(parent, parent.getChildAt(0), tipLayout, listener);
     }
 
     public static Tip from(Fragment fragment, @LayoutRes int tipLayout, @Nullable Tip.Listener listener) {
-        View content = fragment.getView();
-        if (content == null) {
+        View view = fragment.getView();
+        if (view == null) {
             throw new NullPointerException("fragment.getView() == null");
         }
-        ViewGroup parent = (ViewGroup) content.getParent();
+        ViewGroup parent = (ViewGroup) view.getParent();
         return new Tip(parent, parent.getChildAt(0), tipLayout, listener);
     }
 
     public static Tip from(android.support.v4.app.Fragment fragment, @LayoutRes int tipLayout, @Nullable Tip.Listener listener) {
-        View content = fragment.getView();
-        if (content == null) {
+        View view = fragment.getView();
+        if (view == null) {
             throw new NullPointerException("fragment.getView() == null");
         }
-        ViewGroup parent = (ViewGroup) content.getParent();
+        ViewGroup parent = (ViewGroup) view.getParent();
         return new Tip(parent, parent.getChildAt(0), tipLayout, listener);
     }
 
     public static Tip from(DialogFragment dialogFragment, @LayoutRes int tipLayout, @Nullable Tip.Listener listener) {
-        View content = dialogFragment.getView();
-        if (content == null) {
+        View view = dialogFragment.getView();
+        if (view == null) {
             throw new NullPointerException("dialogFragment.getView() == null");
         }
-        ViewGroup parent = (ViewGroup) content.getParent();
+        ViewGroup parent = (ViewGroup) view.getParent();
         return new Tip(parent, parent.getChildAt(0), tipLayout, listener);
     }
 
     public static Tip from(android.support.v4.app.DialogFragment dialogFragment, @LayoutRes int tipLayout, @Nullable Tip.Listener listener) {
-        View content = dialogFragment.getView();
-        if (content == null) {
+        View view = dialogFragment.getView();
+        if (view == null) {
             throw new NullPointerException("dialogFragment.getView() == null");
         }
-        ViewGroup parent = (ViewGroup) content.getParent();
+        ViewGroup parent = (ViewGroup) view.getParent();
         return new Tip(parent, parent.getChildAt(0), tipLayout, listener);
     }
 
