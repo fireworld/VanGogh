@@ -3,14 +3,13 @@ package cc.colorcat.vangoghdemo.widget;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import cc.colorcat.vangoghdemo.R;
 
 /**
  * Created by cxx on 2018/2/24.
@@ -83,11 +82,11 @@ public class Tip {
     }
 
     public final void showTip() {
-        final View tipView = getTipView();
-        if (tipView.getParent() == null) {
+        final View tip = getTipView();
+        if (tip.getParent() == null) {
             mContentIndex = mParentView.indexOfChild(mContentView);
             mParentView.removeViewAt(mContentIndex);
-            mParentView.addView(tipView, mContentIndex, mContentView.getLayoutParams());
+            mParentView.addView(tip, mContentIndex, mContentView.getLayoutParams());
         }
     }
 
@@ -104,8 +103,10 @@ public class Tip {
 
     private View getTipView() {
         if (mTipView == null) {
-            mTipView = LayoutInflater.from(mParentView.getContext()).inflate(mTipLayout, mParentView, false);
-            View tip = mTipView.findViewById(R.id.tip);
+            Context ctx = mParentView.getContext();
+            mTipView = LayoutInflater.from(ctx).inflate(mTipLayout, mParentView, false);
+            int id = ctx.getResources().getIdentifier("tip", "id", ctx.getPackageName());
+            View tip = mTipView.findViewById(id);
             if (tip != null) {
                 tip.setOnClickListener(new View.OnClickListener() {
                     @Override
