@@ -50,7 +50,7 @@ public class CornerTransformation implements Transformation {
         return new CornerTransformation(cornerRadius, borderWidth, borderColor, 0);
     }
 
-    private CornerTransformation(float[] cornerRadius, float borderWidth, @ColorInt int borderColor, int type) {
+    protected CornerTransformation(float[] cornerRadius, float borderWidth, @ColorInt int borderColor, int type) {
         this.cornerRadius = cornerRadius;
         this.borderWidth = borderWidth;
         this.borderColor = borderColor;
