@@ -1,5 +1,6 @@
 package cc.colorcat.vangoghdemo.view;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,8 +14,7 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
-import cc.colorcat.vangogh.CircleTransformation;
-import cc.colorcat.vangogh.SquareTransformation;
+import cc.colorcat.vangogh.CornerTransformation;
 import cc.colorcat.vangogh.Transformation;
 import cc.colorcat.vangogh.VanGogh;
 import cc.colorcat.vangoghdemo.R;
@@ -62,14 +62,22 @@ public class CourseActivity extends BaseActivity implements ICourses.View, Tip.L
 
     private ChoiceRvAdapter createAdapter() {
         mAdapter = new SimpleAutoChoiceRvAdapter<Course>(mCourses, R.layout.item_course) {
-            private final Transformation square = new SquareTransformation();
-            private final Transformation circle = new CircleTransformation();
+            private final Transformation TL_BR = CornerTransformation.create(
+                    CornerTransformation.TYPE_TL | CornerTransformation.TYPE_BR,
+                    16F,
+                    Color.RED
+            );
+            private final Transformation BL_TR = CornerTransformation.create(
+                    CornerTransformation.TYPE_BL | CornerTransformation.TYPE_TR,
+                    16F,
+                    Color.YELLOW
+            );
 
             @Override
             public void bindView(RvHolder holder, Course data) {
                 RvHolder.Helper helper = holder.getHelper();
                 ImageView icon = helper.getView(R.id.iv_icon);
-                Transformation trans = (helper.getPosition() & 1) == 0 ? circle : square;
+                Transformation trans = (helper.getPosition() & 1) == 0 ? TL_BR : BL_TR;
                 VanGogh.with(CourseActivity.this)
                         .load(data.getPicBigUrl())
                         .addTransformation(trans)
